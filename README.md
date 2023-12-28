@@ -14,6 +14,7 @@ A web application that allows users to create tournaments, join tournaments, tra
 This is just a draft that was created to get a better understanding of the application structure.
 ![Application schema](images/app_scheme.png)
 
+
 ## Installation
 1. Clone the repository
 ```
@@ -22,6 +23,10 @@ git clone ...
 2. Install dependencies
 ```
 npm install
+```
+3. Create `passkeys.key` file in the root directory and add your connection string to the MySQL database.
+```
+USER, PASSWORD, tournamently
 ```
 
 
