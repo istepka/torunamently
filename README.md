@@ -24,7 +24,7 @@ git clone ...
 ```
 npm install
 ```
-3. Create `passkeys.key` file in the root directory and add your connection string to the MySQL database.
+3. Change the dummy variables in `passkeys.key` file in the root directory and add your connection details to your local MySQL database.
 ```
 USER, PASSWORD, tournamently
 ```

@@ -1,0 +1,8 @@
+Diagram scheme:
+https://app.smartdraw.com/editor.aspx?credID=-57714663&depoId=52973457&flags=128#depoId=52973457&credID=-57714663
+
+YT video "React Node.js MySQL CRUD Tutorial for Beginners":
+https://www.youtube.com/watch?v=fPuLnzSjPLE
+
+Repo:
+https://github.com/istepka/torunamently
