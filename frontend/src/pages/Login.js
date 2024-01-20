@@ -12,6 +12,7 @@ const Login = () => {
     const [popupMessage, setPopupMessage] = useState(""); 
     const [popupTitle, setPopupTitle] = useState(""); // ["Error", "Success"
     const [showPopup, setShowPopup] = useState(false);
+    const [action, setAction] = useState("login"); // ["login", "sign_up"]
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -25,7 +26,14 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post("http://localhost:8801/sign_in", credentials);
+            var response = null;
+            if (action === "login") {
+                response = await axios.post("http://localhost:8801/sign_in", credentials);
+            }
+            else if (action === "sign_up") {
+                response = await axios.post("http://localhost:8801/sign_up", credentials);
+            }
+
             
             const status = response.data.status;
             const message = response.data.message;
@@ -38,7 +46,7 @@ const Login = () => {
                 // wait 2 seconds before redirecting to home page
                 setTimeout(() => {
                     window.location.href = "/";
-                }, 2000);
+                }, action === "login" ? 2000 : 5000);
 
             } else {
                 setPopupMessage(message);
@@ -54,14 +62,15 @@ const Login = () => {
         setShowPopup(false);
         setPopupTitle("");
         setPopupMessage("");
+        setCredentials({...credentials, password: ""});
     };
 
     return (
         <div className="container">
             <div className="row justify-content-center">
                 <div className="col-md-6">
-                    <h1 className="mt-5 mb-4">Login</h1>
-                    <form onSubmit={handleSubmit}>
+                    <h1 className="mt-5 mb-4">{action === "login" ? "Login" : "Sign Up"} to Tournamently</h1>
+                    <form id="login-form" onSubmit={handleSubmit}>
                         <div className="mb-3">
                             <label htmlFor="email" className="form-label">email</label>
                             <input
@@ -86,8 +95,12 @@ const Login = () => {
                                 required
                             />
                         </div>
-                        <button type="submit" className="btn btn-primary">Login</button>
+                        <button type="submit" className="btn btn-primary">{action === "login" ? "Login" : "Sign Up"}</button>
                     </form>
+
+                    <button className="btn btn-link" onClick={() => setAction(action === "login" ? "sign_up" : "login")}>
+                        {action ? "Don't have an account? Sign up here." : "Already have an account? Login here."}
+                    </button>
 
                     <Popup title={popupTitle} message={popupMessage} show={showPopup} onClose={closePopup} />
                 </div>

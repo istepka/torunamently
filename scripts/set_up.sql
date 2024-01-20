@@ -3,7 +3,8 @@ CREATE DATABASE IF NOT EXISTS tournamently;
 CREATE TABLE tournamently.USERS (
     email VARCHAR(255) NOT NULL PRIMARY KEY,
     password VARCHAR(255) NOT NULL,
-    verified BOOLEAN NOT NULL DEFAULT FALSE
+    verified BOOLEAN NOT NULL DEFAULT FALSE,
+    verification_token VARCHAR(255)
 );
 
 CREATE TABLE tournamently.TOURNAMENTS (
