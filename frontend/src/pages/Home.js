@@ -2,18 +2,20 @@ import React, { useState, useEffect } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import Header from './Header';
+import axios from 'axios';
+import CreateTournamentModal from './objects/CreateTournamentModal';
 
 const Home = () => {
 
     const [tournaments, setTournaments] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [sigedUpToTournys, setSignedUpToTournys] = useState([]);
     const [tournamentsPerPage] = useState(10); 
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
     useEffect(() => {
         const fetchAllTournaments = async () => {
             try {
-                const token = localStorage.getItem("token");
-
                 const response = await fetch("http://localhost:8801/get_all_tournaments");
                 const jsonData = await response.json();
                 setTournaments(jsonData);
@@ -24,7 +26,29 @@ const Home = () => {
             }
         }
         fetchAllTournaments();
-    }, [])
+
+
+        const getListOfTournamentsUserIsSignedUpTo = () => {
+            const token = localStorage.getItem("token");
+            const email = localStorage.getItem("email");
+    
+            axios.get(`http://localhost:8801/get_list_of_tournaments_user_is_signed_up_to?token=${token}&email=${email}`)
+                .then(res => {
+                    console.log(res.data)
+                    // only if success
+                    if (res.data.status === "success") {
+                        setSignedUpToTournys(res.data.data);
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                })
+        }
+
+        getListOfTournamentsUserIsSignedUpTo();
+
+
+    }, [setSignedUpToTournys])
 
     function formatDate(date) {
        // return in format: 2021-05-01 12:00
@@ -61,6 +85,20 @@ const Home = () => {
         const token = localStorage.getItem('token');
         return token !== null && token !== undefined;
     };
+
+
+
+    function checkIfUserSignedUpToTourny(tournamentId) {
+        for (let i = 0; i < sigedUpToTournys.length; i++) {
+            if (sigedUpToTournys[i] === tournamentId) {
+                return true;
+            }
+        }
+    }
+
+    const handleCreateModalToggle = () => {
+        setShowCreateModal(!showCreateModal);
+    };
     
 
     return (
@@ -73,7 +111,12 @@ const Home = () => {
                     <div className="col-sm d-flex justify-content-end align-items-center">
                         {isAuthenticated() ? (
                             // If user is authenticated, show user's email button
-                            <a href="/account" className="btn btn-primary">{localStorage.getItem('email')}</a>
+                            <div>
+                                <button className="btn btn-success ml-2" data-toggle="modal" data-target="#createTournamentModal">Create Tournament</button>
+
+                                <a href="/account" className="btn btn-primary ml-2">{localStorage.getItem('email')}</a>
+                            </div>
+
                         ) : (
                             // If user is not authenticated, show login/signup button
                             <a href="/login" className="btn btn-primary">Log In / Sign Up</a>
@@ -94,10 +137,13 @@ const Home = () => {
                                 <th scope="col">Max Participants</th>
                                 <th scope="col">Application Deadline</th>
                                 <th scope="col">Creator</th>
+                                {isAuthenticated() ? (
+                                    <th scope="col">User signed up</th>
+                                ) : (<th scope="col" style={{display: "none"}}>User signed up</th>)}
                             </tr>
                         </thead>
                         <tbody>
-                            {tournaments.map((tournament) => (
+                            {currentTournaments.map((tournament) => (
                                 <tr key={tournament.id}>
                                     <th scope="row">{tournament.id}</th>
                                     <td>{tournament.name}</td>
@@ -108,6 +154,15 @@ const Home = () => {
                                     <td>{tournament.max_participants}</td>
                                     <td>{formatDate(tournament.app_deadline)}</td>
                                     <td>{tournament.creator}</td>
+                                    {isAuthenticated() ? (
+                                        <td>
+                                            {checkIfUserSignedUpToTourny(tournament.id) ? (
+                                                <p>Yes</p>
+                                            ) : (
+                                                <p>No</p>
+                                            )}
+                                        </td>
+                                    ) : (<td style={{display: "none"}}></td>)}
                                 </tr>
                             ))}
                         </tbody>
@@ -128,6 +183,7 @@ const Home = () => {
 
                 </div>
             </div>
+            <CreateTournamentModal onClose={handleCreateModalToggle} />
         </div>
     );
 }

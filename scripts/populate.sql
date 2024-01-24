@@ -1,25 +1,106 @@
 INSERT INTO tournamently.USERS (email, password, verified) VALUES
-('user1@example.com', 'password1', true),
-('user2@example.com', 'password2', false),
-('user3@example.com', 'password3', true);
+('chess_master@example.com', 'password1', true),
+('hoopstar@example.com', 'password2', true),
+('soccer_fanatic@example.com', 'password3', true),
+('pingpong_pro@example.com', 'password4', true),
+('golf_enthusiast@example.com', 'password5', true),
+('shuttle_king@example.com', 'password6', true),
+('tennis_champion@example.com', 'password7', true),
+('swim_master@example.com', 'password8', true),
+('dart_sharpshooter@example.com', 'password9', true),
+('volley_pro@example.com', 'password10', true),
+('martial_artist@example.com', 'password11', true),
+('cycle_enthusiast@example.com', 'password12', true),
+('track_and_field@example.com', 'password13', true),
+('snooker_pro@example.com', 'password14', true),
+('gymnast_champion@example.com', 'password15', true),
+('surfing_pro@example.com', 'password16', true),
+('equestrian_lover@example.com', 'password17', true),
+('archery_expert@example.com', 'password18', true),
+('hockey_pro@example.com', 'password19', true),
+('frisbee_champion@example.com', 'password20', true),
+('wrestling_star@example.com', 'password21', true),
+('rugby_warrior@example.com', 'password22', true),
+('fencing_maestro@example.com', 'password23', true),
+('golf_pro@example.com', 'password24', true);
+
+
 
 INSERT INTO tournamently.TOURNAMENTS (name, discipline, time, geo_coordinates, location, max_participants, app_deadline, creator) VALUES
-('Tournament 1', 'Discipline 1', '2022-01-01', '40.712776,-74.005974', 'New York', 100, '2021-12-01', 'user1@example.com'),
-('Tournament 2', 'Discipline 2', '2022-02-01', '34.052235,-118.243683', 'Los Angeles', 200, '2021-12-15', 'user2@example.com');
+('Chess Championship', 'Chess', '2022-03-15', '40.712776,-74.005974', 'New York', 50, '2022-02-28', 'chess_master@example.com'),
+('Basketball Showdown', 'Basketball', '2022-04-02', '34.052235,-118.243683', 'Los Angeles', 100, '2022-03-15', 'hoopstar@example.com'),
+('Soccer Spectacle', 'Soccer', '2022-05-10', '51.509865,-0.118092', 'London', 80, '2022-04-25', 'soccer_fanatic@example.com'),
+('Table Tennis Challenge', 'Table Tennis', '2022-06-20', '35.689487,139.691711', 'Tokyo', 60, '2022-06-05', 'pingpong_pro@example.com'),
+('Golf Tournament', 'Golf', '2022-07-05', '33.749001,-84.387978', 'Atlanta', 40, '2022-06-20', 'golf_enthusiast@example.com'),
+('Badminton Battle', 'Badminton', '2022-08-18', '1.352083,103.819836', 'Singapore', 70, '2022-08-01', 'shuttle_king@example.com'),
+('Tennis Open', 'Tennis', '2022-09-12', '48.856613,2.352222', 'Paris', 90, '2022-08-27', 'tennis_champion@example.com'),
+('Swimming Challenge', 'Swimming', '2022-10-25', '40.712776,-74.005974', 'New York', 50, '2022-10-10', 'swim_master@example.com'),
+('Darts Extravaganza', 'Darts', '2022-11-08', '51.509865,-0.118092', 'London', 30, '2022-10-23', 'dart_sharpshooter@example.com'),
+('Volleyball Clash', 'Volleyball', '2022-12-03', '34.052235,-118.243683', 'Los Angeles', 80, '2022-11-18', 'volley_pro@example.com'),
+('Martial Arts Showdown', 'Martial Arts', '2023-01-20', '35.689487,139.691711', 'Tokyo', 60, '2023-01-05', 'martial_artist@example.com'),
+('Cycling Challenge', 'Cycling', '2023-02-15', '48.856613,2.352222', 'Paris', 40, '2023-01-30', 'cycle_enthusiast@example.com'),
+('Athletics Championship', 'Athletics', '2023-03-10', '33.749001,-84.387978', 'Atlanta', 100, '2023-02-22', 'track_and_field@example.com'),
+('Snooker Invitational', 'Snooker', '2023-04-18', '1.352083,103.819836', 'Singapore', 50, '2023-04-01', 'snooker_pro@example.com'),
+('Gymnastics Gala', 'Gymnastics', '2023-05-22', '40.712776,-74.005974', 'New York', 70, '2023-05-07', 'gymnast_champion@example.com'),
+('Surfing Showdown', 'Surfing', '2023-06-30', '-33.868820,151.209296', 'Sydney', 50, '2023-06-15', 'surfing_pro@example.com'),
+('Equestrian Elegance', 'Equestrian', '2023-07-15', '51.509865,-0.118092', 'London', 30, '2023-06-30', 'equestrian_lover@example.com'),
+('Archery Championship', 'Archery', '2023-08-10', '34.052235,-118.243683', 'Los Angeles', 40, '2023-07-25', 'archery_expert@example.com'),
+('Ice Hockey Classic', 'Ice Hockey', '2023-09-25', '55.755825,37.617298', 'Moscow', 60, '2023-09-10', 'hockey_pro@example.com'),
+('Ultimate Frisbee Fest', 'Ultimate Frisbee', '2023-10-12', '37.774929,-122.419416', 'San Francisco', 40, '2023-09-27', 'frisbee_champion@example.com'),
+('Wrestling Showdown', 'Wrestling', '2023-11-05', '35.689487,139.691711', 'Tokyo', 70, '2023-10-20', 'wrestling_star@example.com'),
+('Rugby Rumble', 'Rugby', '2023-12-20', '-36.848461,174.763336', 'Auckland', 80, '2023-12-05', 'rugby_warrior@example.com'),
+('Fencing Frenzy', 'Fencing', '2024-01-15', '48.856613,2.352222', 'Paris', 50, '2023-12-30', 'fencing_maestro@example.com'),
+('Golf Masters', 'Golf', '2024-02-08', '33.749001,-84.387978', 'Atlanta', 60, '2024-01-24', 'golf_pro@example.com');
+
 
 INSERT INTO tournamently.TOURNAMENT_PARTICIPANTS (tournament_id, participant) VALUES
-(1, 'user2@example.com'),
-(1, 'user3@example.com'),
-(2, 'user1@example.com');
+(1, 'hoopstar@example.com'),
+(1, 'soccer_fanatic@example.com'),
+(1, 'archery_expert@example.com'),
+(1, 'wrestling_star@example.com'),
+(2, 'chess_master@example.com'),
+(2, 'surfing_pro@example.com'),
+(2, 'golf_enthusiast@example.com'),
+(2, 'volley_pro@example.com'),
+(3, 'track_and_field@example.com'),
+(3, 'snooker_pro@example.com'),
+(3, 'martial_artist@example.com'),
+(4, 'cycle_enthusiast@example.com'),
+(4, 'swim_master@example.com'),
+(4, 'equestrian_lover@example.com');
+
 
 INSERT INTO tournamently.SPONSORS (name, logo, website) VALUES
-('Sponsor 1', 'logo1.png', 'www.sponsor1.com'),
-('Sponsor 2', 'logo2.png', 'www.sponsor2.com');
+('Coca cola', 'https://i.ytimg.com/vi/UDYCc4dbSJU/maxresdefault.jpg', 'www.coke.com'),
+('SEJM RP', 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Sejm_RP_logo_and_wordmark.svg/1200px-Sejm_RP_logo_and_wordmark.svg.png', 'www.sejm.gov.pl'),
+('Sprite', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Sprite_2022.svg/640px-Sprite_2022.svg.png', 'www.sprite.com'),
+('Tiktok', 'https://sf-static.tiktokcdn.com/obj/eden-sg/uhtyvueh7nulogpoguhm/tiktok-icon2.png', 'www.tiktok.com');
 
 INSERT INTO tournamently.TOURNAMENT_SPONSORS (tournament_id, sponsor_name) VALUES
-(1, 'Sponsor 1'),
-(2, 'Sponsor 2');
+(1, 'Sprite'),
+(1, 'Coca cola'),
+(2, 'SEJM RP'),
+(2, 'Tiktok'),
+(3, 'Tiktok'),
+(3, 'Coca cola'),
+(4, 'Sprite');
+
 
 INSERT INTO tournamently.TOURNAMENT_RESULTS (tournament_id, participant1, participant2, score1, score2, verified) VALUES
-(1, 'user2@example.com', 'user3@example.com', 3, 2, true),
-(2, 'user1@example.com', 'user2@example.com', 2, 3, false);
+(1, 'hoopstar@example.com', 'soccer_fanatic@example.com', 2, 1, true),
+(1, 'archery_expert@example.com', 'wrestling_star@example.com', 3, 2, true),
+(1, 'soccer_fanatic@example.com', 'archery_expert@example.com', 1, 0, true),
+(1, 'hoopstar@example.com', 'wrestling_star@example.com', 2, 3, true),
+
+(2, 'chess_master@example.com', 'surfing_pro@example.com', 3, 1, true),
+(2, 'golf_enthusiast@example.com', 'volley_pro@example.com', 2, 2, true),
+(2, 'surfing_pro@example.com', 'golf_enthusiast@example.com', 1, 3, true),
+(2, 'chess_master@example.com', 'volley_pro@example.com', 3, 2, true),
+
+(3, 'track_and_field@example.com', 'snooker_pro@example.com', 2, 2, true),
+(3, 'martial_artist@example.com', 'track_and_field@example.com', 3, 1, true),
+(3, 'snooker_pro@example.com', 'martial_artist@example.com', 0, 2, true),
+
+(4, 'cycle_enthusiast@example.com', 'swim_master@example.com', 1, 3, true),
+(4, 'equestrian_lover@example.com', 'cycle_enthusiast@example.com', 2, 2, true),
+(4, 'swim_master@example.com', 'equestrian_lover@example.com', 3, 0, true);

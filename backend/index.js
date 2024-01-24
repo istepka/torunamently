@@ -179,6 +179,62 @@ app.get("/verify_account", (req, res) => {
     })
 })
 
+app.get("/get_list_of_tournaments_user_is_signed_up_to", (req, res) => {
+    const {token, email} = req.query
+
+    jwt.verify(token, secret, (err, decoded) => {
+        if (err) {
+            console.log(err)
+            res.send({"status": "error", "message": "Invalid token", "data": []})
+        } else {
+            if (decoded.email === email) {
+                // Token is valid
+
+               const sqlquery = "SELECT id FROM tournamently.TOURNAMENTS WHERE id IN (SELECT tournament_id FROM tournamently.TOURNAMENT_PARTICIPANTS WHERE participant = ?)"
+
+                db.query(sqlquery, [email], (err, result) => {
+                    if (err) {
+                        console.log(err)
+                        res.send({"status": "error", "message": "Database error", "data": []})
+                    } else {
+                        
+                        if (result.length > 0) {
+                            // User is signed up to at least one tournament
+                            // [ { id: 1 } ]
+                            var tournaments = []
+                            for (var i = 0; i < result.length; i++) {
+                                tournaments.push(result[i].id)
+                            }
+                            console.log(tournaments)
+                            res.send({"status": "success", "message": "Success", "data": tournaments})
+                        }
+                        else { // [ ]
+                            // User is not signed up to any tournament
+                            console.log(result)
+                            res.send({"status": "success", "message": "Success", "data": []})
+                        }
+                    }
+                })
+            } else {
+                // Token is invalid
+                res.send({"status": "error", "message": "Invalid token", "data": []})
+            }
+        }
+    })
+})
+
+app.post("/create_tournament", (req, res) => {
+    const tournamentData = req.body.tournamentData
+    const sponsors = req.body.sponsors
+    const token = req.body.token
+
+    jwt.verify(token, secret, (err, decoded) => {
+    })
+})
+
+
+
+
 app.listen(8801, () => {
     console.log("Backend server is running! Port: 8801");
 })
