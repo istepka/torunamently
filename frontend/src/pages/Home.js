@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
+import Header from './Header';
 
 const Home = () => {
 
@@ -11,6 +12,8 @@ const Home = () => {
     useEffect(() => {
         const fetchAllTournaments = async () => {
             try {
+                const token = localStorage.getItem("token");
+
                 const response = await fetch("http://localhost:8801/get_all_tournaments");
                 const jsonData = await response.json();
                 setTournaments(jsonData);
@@ -51,19 +54,30 @@ const Home = () => {
     const currentTournaments = tournaments.slice(indexOfFirstTournament, indexOfLastTournament);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    // Other logic
+    const isAuthenticated = () => {
+        // Check if the user has a valid token
+        const token = localStorage.getItem('token');
+        return token !== null && token !== undefined;
+    };
     
 
     return (
         <div>
+            <Header />
             <div className="container">
 
-                <div className="row mb-3">
-                    <div className="col-sm d-flex">
-                        <img className="" src="./logo192.png" alt="Logo" width="50" height="50"></img>
-                        <h1>Tournamently</h1>
-                    </div>
+                <div className="row mb-3 mt-3">
+
                     <div className="col-sm d-flex justify-content-end align-items-center">
-                        <a href="/login" className="btn btn-primary">Log In / Sign Up</a>
+                        {isAuthenticated() ? (
+                            // If user is authenticated, show user's email button
+                            <a href="/account" className="btn btn-primary">{localStorage.getItem('email')}</a>
+                        ) : (
+                            // If user is not authenticated, show login/signup button
+                            <a href="/login" className="btn btn-primary">Log In / Sign Up</a>
+                        )}
                     </div>
                 </div>
 

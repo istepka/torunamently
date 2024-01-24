@@ -3,6 +3,7 @@ import axios from 'axios';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import Popup from "./objects/Popup";
+import Header from './Header';
 
 const Login = () => {
     const [credentials, setCredentials] = useState({
@@ -29,6 +30,14 @@ const Login = () => {
             var response = null;
             if (action === "login") {
                 response = await axios.post("http://localhost:8801/sign_in", credentials);
+                
+                const token = response.data.token;
+                if (token !== "") {
+                    localStorage.setItem("token", token);
+                    localStorage.setItem("email", credentials.email);
+                    console.log("Token saved to local storage!");
+                }
+
             }
             else if (action === "sign_up") {
                 response = await axios.post("http://localhost:8801/sign_up", credentials);
@@ -67,6 +76,9 @@ const Login = () => {
 
     return (
         <div className="container">
+            
+            <Header />
+
             <div className="row justify-content-center">
                 <div className="col-md-6">
                     <h1 className="mt-5 mb-4">{action === "login" ? "Login" : "Sign Up"} to Tournamently</h1>

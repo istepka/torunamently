@@ -3,11 +3,14 @@ import mysql from "mysql2";
 import fs from "fs";
 import cors from "cors";
 import nodemailer from "nodemailer";
+import jwt from 'jsonwebtoken';
 
 import { hashPassword, comparePassword } from "./utils/crypt.js";
 import { getRandomValues } from "crypto";
 
 const app = express()
+
+const secret = "123"
 
 app.use(express.json())
 app.use(cors())
@@ -17,7 +20,7 @@ const dbConfig = JSON.parse(rawConfig)
 console.log(dbConfig)
 
 const emailCredentials = JSON.parse(fs.readFileSync("./email_config.json"))
-console.log(emailCredentials)
+// console.log(emailCredentials)
 
 const db = mysql.createConnection(dbConfig)
 
@@ -118,7 +121,11 @@ app.post("/sign_in", async (req, res) => {
                     // Password matches
                     if (result[0].verified === 1) {
                         // Account is verified
-                        res.send({"status": "success", "message": "Login successful!", "token": "PLACEHOLDER_TOKEN"})
+
+                        // Generate JWT token
+                        const token = jwt.sign({ email }, secret, { expiresIn: '1h' });
+
+                        res.send({"status": "success", "message": "Login successful!", "token": token})
                     } else {
                         // Account is not verified
                         res.send({"status": "error", "message": "Account is not verified!", "token": ""})

@@ -1,0 +1,23 @@
+/* Header.css */
+.header-container {
+    background-color: #007bff; /* Bootstrap primary color */
+    padding: 10px;
+    text-align: center;
+}
+
+.logo-link {
+    color: #fff; /* White text color */
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo {
+    margin-right: 10px;
+}
+
+.website-name {
+    font-size: 24px;
+    font-weight: bold;
+}
