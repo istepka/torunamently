@@ -2,5 +2,6 @@
     "host": "localhost",
     "user": "admin",
     "password": "admins_password",
-    "port": 3306
+    "port": 3306,
+    "database": "tournamently"
 }

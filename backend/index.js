@@ -1,5 +1,4 @@
 import express from "express";
-import mysql from "mysql2";
 import fs from "fs";
 import cors from "cors";
 import nodemailer from "nodemailer";
@@ -7,6 +6,15 @@ import jwt from 'jsonwebtoken';
 
 import { hashPassword, comparePassword } from "./utils/crypt.js";
 import { getRandomValues } from "crypto";
+import { 
+    getAllTournaments, signUp, 
+    signIn, verifyAccount, 
+    getListOfTournamentsUserIsSignedUpTo, 
+    createTournament, getTournamentDetailsById,
+    getSponsorsByTournamentId, checkIfUserIsSignedUpToTournament,
+    isUserTournamentCreator, signUpUserToTournament,
+    getTournamentParticipants
+} from "./utils/db_ops.js";
 
 const app = express()
 
@@ -15,223 +23,399 @@ const secret = "123"
 app.use(express.json())
 app.use(cors())
 
-const rawConfig = fs.readFileSync("./db_config.json")
-const dbConfig = JSON.parse(rawConfig)
-console.log(dbConfig)
-
 const emailCredentials = JSON.parse(fs.readFileSync("./email_config.json"))
-// console.log(emailCredentials)
 
-const db = mysql.createConnection(dbConfig)
-
-db.connect((err) => {
-    if (err) {
-        console.log(err)
-    } else {
-        console.log("Database connected!")
-    }
-})
 
 app.get("/", (req, res) => {
     res.send("Hello World Backend!");
 })
 
-app.get("/get_all_tournaments", (req, res) => {
-    db.query("SELECT * FROM tournamently.TOURNAMENTS", (err, result) => {
-        if (err) {
-            console.log(err)
-        } else {
-            res.send(result)
-        }
-    })
-})
+app.get("/get_all_tournaments", async (req, res) => {
+    try {
+        const tournaments = await getAllTournaments();
+        res.send(tournaments);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
 app.post("/sign_up", async (req, res) => {
-    const {email, password} = req.body
-    const hashedPassword = await hashPassword(password)
+    const { email, password } = req.body;
 
-    console.log(email, password, hashedPassword)
+    try {
+        // Call signUp function to create user
+        const user = await signUp(email, password);
 
-    db.query("INSERT INTO tournamently.USERS (email, password) VALUES (?, ?)", [email, hashedPassword], async (err, result) => {
-        if (err) {
-            console.log(err)
-            res.send({"status": "error", "message": "Error", "token": ""})
-        } else {
-           
+        // Send verification email
+        const transporter = nodemailer.createTransport({
+            host: "smtp.wp.pl",
+            port: 465,
+            secure: true,
+            auth: {
+                user: emailCredentials.email,
+                pass: emailCredentials.password,
+            },
+        });
 
-            // Send verification email
-            const transporter = nodemailer.createTransport({
-                host: "smtp.wp.pl",
-                port: 465,
-                secure: true,
-                auth: {
-                    user: emailCredentials.email,
-                    pass: emailCredentials.password
-                }
-            })
+        const token = getRandomValues(new Uint8Array(16)).join("");
 
-            var token = getRandomValues(new Uint8Array(16)).join("")
+        // Update user with verification token
+        await user.update({ verification_token: token });
 
-            db.query("UPDATE tournamently.USERS SET verification_token = ? WHERE email = ?", [token, email], (err, result) => {
-                if (err) {
-                    console.log(err)
-                    res.send({"status": "error", "message": "Database error", "token": ""})
-                }
-            })
+        const mailOptions = {
+            from: emailCredentials.email,
+            to: email,
+            subject: 'Tournamently Account Verification',
+            text: 'Click the link below to verify your account:\nhttp://localhost:8801/verify_account?email=' + email + '&token=' + token
+        };
 
-            const mailOptions = {
-                from: emailCredentials.email,
-                to: email,
-                subject: 'Tournamently Account Verification',
-                text: 'Click the link below to verify your account:\nhttp://localhost:8801/verify_account?email=' + email + '&token=' + token
-            };
+        await transporter.sendMail(mailOptions);
 
-            try {
-                await transporter.sendMail(mailOptions);
-                const mess = "Account created successfully!\nA verification email has been sent to " + email + " .\nYou need to verify your account before logging in!"
-                res.send({"status": "success", "message": mess, "token": ""})
-            } catch (error) {
-                console.error('Error sending email:', error);
-                const mess = "There was an error while sending the verification email!\nPlease try again later!"
-                // TODO: Delete the user from the database, since the email was not sent
-                res.send({"status": "error", "message": mess, "token": ""})
-            }
+        const message = "Account created successfully!\nA verification email has been sent to " + email + ".\nYou need to verify your account before logging in!";
+        res.send({ "status": "success", "message": message, "token": "" });
+    } catch (error) {
+        console.error('Error during sign up:', error);
 
-
-        }
-    })
-})
+        const message = "There was an error during sign up!\nPlease try again later!";
+        // TODO: Delete the user from the database, since the sign-up process was not completed
+        res.send({ "status": "error", "message": message, "token": "" });
+    }
+});
 
 app.post("/sign_in", async (req, res) => {
-    const {email, password} = req.body
-    // First check if the email exists
-    // Then check if the password matches
-    // Then check if user account is verified   
+    const { email, password } = req.body;
 
-    const hashedPassword = await hashPassword(password)
+    try {
+        // Call signIn function to authenticate user
+        const result = await signIn(email, password);
 
-    db.query("SELECT * FROM tournamently.USERS WHERE email = ?", [email], (err, result) => {
-        if (err) {
-            console.log(err)
-        } else {
-            if (result.length > 0) {
-                // Email exists
-                console.log(result[0].password, hashedPassword)
-                if (result[0].password === hashedPassword) {
-                    // Password matches
-                    if (result[0].verified === 1) {
-                        // Account is verified
+        res.send(result);
+    } catch (error) {
+        console.error('Error during sign-in:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
-                        // Generate JWT token
-                        const token = jwt.sign({ email }, secret, { expiresIn: '1h' });
+app.get("/verify_account", async (req, res) => {
+    const { email, token } = req.query;
 
-                        res.send({"status": "success", "message": "Login successful!", "token": token})
-                    } else {
-                        // Account is not verified
-                        res.send({"status": "error", "message": "Account is not verified!", "token": ""})
+    try {
+        // Call verifyAccount function to verify the account
+        const result = await verifyAccount(email, token);
+
+        res.send(result);
+    } catch (error) {
+        console.error('Error during account verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+app.get("/get_list_of_tournaments_user_is_signed_up_to", async (req, res) => {
+    const { token, email } = req.query;
+    console.log("email: " + email);
+    console.log("token: " + token);
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": [] });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": [] });
+            } else {
+                if (decoded.email === email) {
+                    // Token is valid
+
+                    try {
+                        // Call getListOfTournamentsUserIsSignedUpTo function to get the list of tournaments
+                        const tournaments = await getListOfTournamentsUserIsSignedUpTo(email);
+
+                        // Send the structured response
+                        res.send({ "status": "success", "message": "Success", "data": tournaments });
+                    } catch (error) {
+                        console.error('Error fetching tournaments:', error);
+                        res.send({ "status": "error", "message": "Database error", "data": [] });
                     }
                 } else {
-                    // Password does not match
-                    res.send({"status": "error", "message": "Password does not match!", "token": ""})
+                    // Token is invalid
+                    res.send({ "status": "error", "message": "Invalid token", "data": [] });
                 }
-            } else {
-                // Email does not exist
-                res.send({"status": "error", "message": "Email does not exist!", "token": ""})
             }
-        }
-    })
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
-})
+app.post("/create_tournament", async (req, res) => {
+    const tournamentData = req.body.tournamentData;
+    const sponsor = req.body.sponsors;
+    const token = req.body.token;
 
-app.get("/verify_account", (req, res) => {
-    const {email, token} = req.query
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": {} });
+            } else {
+                try {
+                    // Call createTournament function to handle tournament creation
+                    const result = await createTournament(tournamentData, sponsor, decoded.email);
 
-    // Check if email exists
-    // Check if token matches
-    // If both are true, then update verified column to 1
-    console.log(email, token)
-
-
-    db.query("SELECT * FROM tournamently.USERS WHERE email = ?", [email], (err, result) => {
-        if (err) {
-            console.log(err)
-        } else {
-            if (result.length > 0) {
-                // Email exists
-                if (result[0].verification_token === token) {
-                    // Token matches
-                    db.query("UPDATE tournamently.USERS SET verified = 1 WHERE email = ?", [email], (err, result) => {
-                        if (err) {
-                            console.log(err)
-                        } else {
-                            res.send({"status": "success", "message": "Account verified successfully!"})
-                        }
-                    })
-                } else {
-                    // Token does not match
-                    res.send({"status": "error", "message": "Token does not match!"})
+                    // Send the structured response
+                    res.send(result);
+                } catch (error) {
+                    console.error('Error creating tournament:', error);
+                    res.send({ "status": "error", "message": "Internal Server Error", "data": {} });
                 }
-            } else {
-                // Email does not exist
-                res.send({"status": "error", "message": "Email does not exist!"})
             }
-        }
-    })
-})
+        });
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send({ "status": "error", "message": "Internal Server Error", "data": {} });
+    }
+});
 
-app.get("/get_list_of_tournaments_user_is_signed_up_to", (req, res) => {
-    const {token, email} = req.query
+app.post("/check_if_user_is_logged_in", async (req, res) => {
+    const token = req.body.token;
 
-    jwt.verify(token, secret, (err, decoded) => {
-        if (err) {
-            console.log(err)
-            res.send({"status": "error", "message": "Invalid token", "data": []})
-        } else {
-            if (decoded.email === email) {
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": {} });
+            } else {
+                // Token is valid
+                res.send({ "status": "success", "message": "Success", "data": {} });
+            }
+        });
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send({ "status": "error", "message": "Internal Server Error", "data": {} });
+    }
+});
+
+app.get("/get_tournament_details", async (req, res) => {
+    const { id, token } = req.query;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": {} });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": {} });
+            } else {
                 // Token is valid
 
-               const sqlquery = "SELECT id FROM tournamently.TOURNAMENTS WHERE id IN (SELECT tournament_id FROM tournamently.TOURNAMENT_PARTICIPANTS WHERE participant = ?)"
+                try {
+                    // Implement logic to fetch tournament details by ID
+                    // Assuming you have a function named getTournamentDetailsById in db_ops.js
+                    const tournamentDetails = await getTournamentDetailsById(id);
 
-                db.query(sqlquery, [email], (err, result) => {
-                    if (err) {
-                        console.log(err)
-                        res.send({"status": "error", "message": "Database error", "data": []})
-                    } else {
-                        
-                        if (result.length > 0) {
-                            // User is signed up to at least one tournament
-                            // [ { id: 1 } ]
-                            var tournaments = []
-                            for (var i = 0; i < result.length; i++) {
-                                tournaments.push(result[i].id)
-                            }
-                            console.log(tournaments)
-                            res.send({"status": "success", "message": "Success", "data": tournaments})
-                        }
-                        else { // [ ]
-                            // User is not signed up to any tournament
-                            console.log(result)
-                            res.send({"status": "success", "message": "Success", "data": []})
-                        }
-                    }
-                })
-            } else {
-                // Token is invalid
-                res.send({"status": "error", "message": "Invalid token", "data": []})
+                    // Send the structured response
+                    res.send({ "status": "success", "message": "Success", "data": { tournament: tournamentDetails } });
+                } catch (error) {
+                    console.error('Error fetching tournament details:', error);
+                    res.send({ "status": "error", "message": "Database error", "data": {} });
+                }
             }
-        }
-    })
-})
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
-app.post("/create_tournament", (req, res) => {
-    const tournamentData = req.body.tournamentData
-    const sponsors = req.body.sponsors
-    const token = req.body.token
+app.get("/get_tournament_sponsors", async (req, res) => {
+    const { id, token } = req.query;
 
-    jwt.verify(token, secret, (err, decoded) => {
-    })
-})
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": [] });
+        return;
+    }
 
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": [] });
+            } else {
+                // Token is valid
+
+                try {
+                    const sponsors = await getSponsorsByTournamentId(id);
+
+                    // Send the structured response
+                    res.send({ "status": "success", "message": "Success", "data": sponsors });
+                } catch (error) {
+                    console.error('Error fetching sponsors:', error);
+                    res.send({ "status": "error", "message": "Database error", "data": [] });
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+app.post("/check_if_signed_up_to_tournament", async (req, res) => {
+    const { token, email, tournamentId } = req.body;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": false });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": false });
+            } else {
+
+                try {
+                    const isSignedUp = await checkIfUserIsSignedUpToTournament(email, tournamentId);
+
+                    // Send the structured response
+                    res.send({ "status": "success", "message": "Success", "data": isSignedUp });
+                } catch (error) {
+                    console.error('Error checking if user is signed up to the tournament:', error);
+                    res.send({ "status": "error", "message": "Database error", "data": false });
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send({ "status": "error", "message": "Internal Server Error", "data": false });
+    }
+});
+
+app.post("/check_if_user_is_tournament_creator", async (req, res) => {
+    const { token, email, tournamentId } = req.body;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": false });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": false });
+            } else {
+                // Token is valid
+
+                try {
+                    // Implement logic to check if user is the creator of the tournament
+                    // Assuming you have a function named isUserTournamentCreator in db_ops.js
+                    const isCreator = await isUserTournamentCreator(email, tournamentId);
+
+                    // Send the structured response
+                    res.send({ "status": "success", "message": "Success", "data": isCreator });
+                } catch (error) {
+                    console.error('Error checking if user is the creator of the tournament:', error);
+                    res.send({ "status": "error", "message": "Database error", "data": false });
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send({ "status": "error", "message": "Internal Server Error", "data": false });
+    }
+});
+
+app.post("/sign_up_to_tournament", async (req, res) => {
+    const { token, email, tournamentId } = req.body;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": {} });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": {} });
+            } else {
+                // Token is valid
+
+                try {
+                    const signUpResult = await signUpUserToTournament(email, tournamentId);
+
+                    // Send the structured response
+                    res.send(signUpResult);
+                } catch (error) {
+                    console.error('Error signing up user to the tournament:', error);
+                    res.send({ "status": "error", "message": "Database error", "data": {} });
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send({ "status": "error", "message": "Internal Server Error", "data": {} });
+    }
+});
+
+app.get("/get_tournament_participants", async (req, res) => {
+    const { id, token } = req.query;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": [] });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": [] });
+            } else {
+                // Token is valid
+
+                try {
+                    const participants = await getTournamentParticipants(id);
+
+                    // Send the structured response
+                    res.send({ "status": "success", "message": "Success", "data": participants });
+                } catch (error) {
+                    console.error('Error fetching tournament participants:', error);
+                    res.send({ "status": "error", "message": "Database error", "data": [] });
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send({ "status": "error", "message": "Internal Server Error", "data": [] });
+    }
+});
 
 
 

@@ -19,7 +19,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/ladder" element={<Ladder />} />
-          <Route path="/tournament-details" element={<TournamentDetails />} />
+          <Route path="/tournament-details/:id" element={<TournamentDetails />} />
+
           <Route path="/login" element={<Login />} />
           <Route path="/account" element={<Account />} />
         </Routes>      

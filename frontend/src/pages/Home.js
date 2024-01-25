@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import Header from './Header';
+import { Link } from 'react-router-dom';
+import './styles/Home.css';
 import axios from 'axios';
 import CreateTournamentModal from './objects/CreateTournamentModal';
 
@@ -126,7 +128,7 @@ const Home = () => {
 
                 <div className="row mb-3">
                     <table id="tournamentsTable" className="table table-sm table-striped table-hover table-bordered">
-                        <thead className="thead-dark">
+                        <thead className="thead-dark center-titles">
                             <tr>
                                 <th scope="col">#</th>
                                 <th scope="col">Name</th>
@@ -140,13 +142,14 @@ const Home = () => {
                                 {isAuthenticated() ? (
                                     <th scope="col">User signed up</th>
                                 ) : (<th scope="col" style={{display: "none"}}>User signed up</th>)}
+                                <th scope="col">More</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {currentTournaments.map((tournament) => (
+                        {currentTournaments.map((tournament) => (
                                 <tr key={tournament.id}>
                                     <th scope="row">{tournament.id}</th>
-                                    <td>{tournament.name}</td>
+                                    <td >{tournament.name}</td>
                                     <td>{formatDate(tournament.time)}</td>
                                     <td>{tournament.location}</td>
                                     <td>{tournament.discipline}</td>
@@ -162,7 +165,17 @@ const Home = () => {
                                                 <p>No</p>
                                             )}
                                         </td>
-                                    ) : (<td style={{display: "none"}}></td>)}
+                                    ) : (<td style={{ display: "none" }}></td>)}
+                                    {/* Add a Link column */}
+                                    <td>
+                                        <Link
+                                            to={isAuthenticated() ?  `/tournament-details/${tournament.id}` : `/login`}
+                                            className="btn btn-outline-primary btn-sm"
+                                            style={{ textDecoration: 'none' }}
+                                        >
+                                            Details
+                                        </Link>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
