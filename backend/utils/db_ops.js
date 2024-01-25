@@ -1,4 +1,4 @@
-import { Users, Tournaments, TournamentParticipants, Sponsors, TournamentSponsors, TournamentResults } from "./models.js";
+import { Users, Tournaments, TournamentParticipants, Sponsors, TournamentSponsors, TournamentResults, Ladder } from "./models.js";
 import { hashPassword } from "./crypt.js";
 import jwt from 'jsonwebtoken';
 
@@ -370,6 +370,104 @@ async function getTournamentParticipants(tournamentId) {
     }
 }
 
+async function updateTournament(tournamentId, tournamentData, sponsors) {
+    try {
+        // Implement logic to update tournament
+        const updatedTournament = await Tournaments.update({
+            name: tournamentData.name,
+            discipline: tournamentData.discipline,
+            time: tournamentData.date,
+            geo_coordinates: tournamentData.coordinates,
+            location: tournamentData.location,
+            max_participants: tournamentData.max_participants,
+            app_deadline: tournamentData.app_deadline,
+        }, {
+            where: {
+                id: tournamentId,
+            },
+        });
+
+        // Update sponsors if provided
+        if (sponsors && sponsors.length > 0) {
+            await updateTournamentSponsors(tournamentId, sponsors);
+        }
+
+        return { "status": "success", "message": "Tournament updated successfully", "data": updatedTournament };
+    } catch (error) {
+        throw new Error(`Error updating tournament: ${error.message}`);
+    }
+}
+
+async function updateTournamentSponsors(tournamentId, sponsors) {
+    try {
+        await TournamentSponsors.destroy({
+            where: {
+                tournament_id: tournamentId,
+            },
+        });
+
+        // Add new sponsors for the tournament
+        for (const sponsor of sponsors) {
+            await TournamentSponsors.create({
+                tournament_id: tournamentId,
+                sponsor_name: sponsor.name,
+            }, { fields: ['tournament_id', 'sponsor_name'] });
+        }
+    } catch (error) {
+        throw new Error(`Error updating tournament sponsors: ${error.message}`);
+    }
+}
+
+async function getLadder(tournamentId) {
+    try {
+        // Check if ladder for the tournament exists
+        const ladder = await Ladder.findAll({
+            where: {
+                tournament_id: tournamentId,
+            },
+            attributes: ['participant', 'idx'],
+        });
+        // If ladder does not exist, create it
+        // ie assign each participant an index
+        if (ladder.length === 0) {
+            const participants = await getTournamentParticipants(tournamentId);
+            for (const [idx, participant] of participants.entries()) {
+                await Ladder.create({
+                    tournament_id: tournamentId,
+                    participant,
+                    idx,
+                }, { fields: ['tournament_id', 'participant', 'idx'] });
+            }
+        }
+
+        // Return ladder
+        const ladderResults = await Ladder.findAll({
+            where: {
+                tournament_id: tournamentId,
+            },
+            attributes: ['participant', 'idx'],
+        });
+
+        return ladderResults;
+
+    } catch (error) {
+        throw new Error(`Error fetching ladder: ${error.message}`);
+    }
+}
+
+async function getResultsForTournament(tournamentId) {
+    try {
+        const results = await TournamentResults.findAll({
+            where: {
+                tournament_id: tournamentId,
+            }, attributes: ['participant1', 'participant2', 'score1', 'score2', 'verified'],
+        });
+        console.log('Results:', results);
+        return results;
+    } catch (error) {
+        throw new Error(`Error fetching tournament results: ${error.message}`);
+    }
+}
 
 
 
@@ -392,5 +490,8 @@ export {
     checkIfUserIsSignedUpToTournament,
     isUserTournamentCreator,
     signUpUserToTournament,
-    getTournamentParticipants
+    getTournamentParticipants,
+    updateTournament,
+    getLadder,
+    getResultsForTournament,
 };

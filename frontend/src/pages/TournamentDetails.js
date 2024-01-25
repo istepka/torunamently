@@ -4,7 +4,12 @@ import { useParams } from 'react-router-dom';
 import Header from './Header';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
+
 import axios from 'axios';
+import EditTournamentModal from './objects/EditTorunamentModal';
+import TournamentSignUpModal from './objects/TournamentSignUpModal';
+import Popup from './objects/Popup';
+import LadderModal from './objects/LadderModal';
 
 const TournamentDetails = () => {
     // Use the useParams hook to get the id from the URL
@@ -17,6 +22,12 @@ const TournamentDetails = () => {
     const [isSignedUp, setIsSignedUp] = useState(false);
     const [isCreator, setIsCreator] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showSignUpModal, setShowSignUpModal] = useState(false);
+    const [showLadderModal, setShowLadderModal] = useState(false);
+    const [popupMessage, setPopupMessage] = useState('');
+    const [popupTitle, setPopupTitle] = useState(''); // ["Error", "Success"]
+    const [showPopup, setShowPopup] = useState(false);
 
     useEffect(() => {
         const fetchTournamentDetails = async () => {
@@ -157,21 +168,37 @@ const TournamentDetails = () => {
         };
     
         fetchData();
-    }, [id, setTournament, setSponsors, setIsSignedUp]);
+    }, [id, setTournament, setSponsors, setIsSignedUp, setShowEditModal]);
     
 
-    function signUpToTournament() {
+    const handleSignUp = ({ licenseNumber, currentRanking }) => {
         const token = localStorage.getItem("token");
         const email = localStorage.getItem("email");
 
-        axios.post(`http://localhost:8801/sign_up_to_tournament`, { token: token, email: email, tournamentId: id })
+        axios.post(`http://localhost:8801/sign_up_to_tournament`, { 
+            token: token, 
+            email: email, 
+            tournamentId: id,
+            licenseNumber: licenseNumber,
+            currentRanking: currentRanking
+        })
             .then(res => {
                 // only if success
                 if (res.data.status === "success") {
-                    alert("Signed up to tournament successfully!");
                     setIsSignedUp(true);
+
+                    // close modal
+                    setShowSignUpModal(false);
+
+                    // show popup
+                    setPopupMessage(res.data.message);
+                    setPopupTitle('Success');
+                    setShowPopup(true);
                 } else {
-                    alert(res.data.message);
+                    // show popup
+                    setPopupMessage(res.data.message);
+                    setPopupTitle('Error');
+                    setShowPopup(true);
                 }
             })
             .catch(err => {
@@ -179,10 +206,11 @@ const TournamentDetails = () => {
             })
     }
 
-    function editTournament() {
-        alert("Edit tournament");
-    }
+    function toggleEditTorunamentModal() {
+        setShowEditModal(!showEditModal);
 
+        // refr
+    }
 
     function renderSignUpButton(show = true) {
         if (!show) {
@@ -191,7 +219,7 @@ const TournamentDetails = () => {
             );
         } else {
             return (
-                <button type="button" className="btn btn-primary" onClick={signUpToTournament}>Sign Up</button>
+                <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign Up</button>
             );
         }
     }
@@ -233,31 +261,35 @@ const TournamentDetails = () => {
     function renderTournamentDetails() {
         return (
             <div className="d-flex flex-column align-items-center">
-                <h1 className="mb-4">{tournament.name}</h1>
-                <div className="d-flex flex-column">
-                    <p className="mb-2"><strong>Discipline:</strong> {tournament.discipline}</p>
-                    <p className="mb-2"><strong>Time:</strong> {formatDate(tournament.time)}</p>
-                    <p className="mb-2"><strong>Location:</strong> {tournament.location}</p>
-                    <strong>Participants:</strong>
-                    <ol className="list-unstyled mb-2">
-                        {participants.map((participant, index) => (
-                            <li key={index}>{participant}</li>
-                        ))}
-                    </ol>
-                    <p className="mb-2"><strong>Max Participants:</strong> {tournament.max_participants}</p>
-                    <p className="mb-2"><strong>Application Deadline:</strong> {formatDate(tournament.app_deadline)}</p>
-                    <p className="mb-2"><strong>Creator:</strong> {tournament.creator}</p>
+            <h1 className="mb-4">{tournament.name}</h1>
+            <div className="d-flex flex-column">
+                <p className="mb-2"><strong>Discipline:</strong> {tournament.discipline}</p>
+                <p className="mb-2"><strong>Time:</strong> {formatDate(tournament.time)}</p>
+                <p className="mb-2"><strong>Location:</strong> {tournament.location}</p>
+                
+                {/* Add a container div with a fixed height and overflow-y: auto */}
+                <strong>Participants:</strong>
+                <div className="participants-list-container mb-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                <ol className="list-unstyled mb-0">
+                    {participants.map((participant, index) => (
+                    <li key={index}>{participant}</li>
+                    ))}
+                </ol>
                 </div>
+
+                <p className="mb-2"><strong>Participants limit:</strong> { participants.length } / {tournament.max_participants}</p>
+                <p className="mb-2"><strong>Application Deadline:</strong> {formatDate(tournament.app_deadline)}</p>
+                <p className="mb-2"><strong>Creator:</strong> {tournament.creator}</p>
             </div>
+            </div>
+
         );
     }
-    
-    
 
     function renderEditButton(owner = false) {
         if (owner) {
             return (
-                <button type="button" className="btn btn-primary ml-2" onClick={editTournament}>Edit</button>
+                <button type="button" className="btn btn-primary ml-2" data-toggle="modal" data-target="#editTournamentModal">Edit</button>
             );
         } else {
             return (
@@ -265,6 +297,16 @@ const TournamentDetails = () => {
             );
         }
     }
+
+    function renderLadderButton() {
+        return (
+            <button type="button" className="btn btn-primary ml-2" data-toggle="modal" data-target="#ladderModal">
+            Ladder
+          </button>
+          
+        );
+    }
+    
 
     if (!isAuthenticated || isSignedUp) {
         console.log('User is not authenticated and not signed up: ', isAuthenticated, isSignedUp);
@@ -276,9 +318,15 @@ const TournamentDetails = () => {
                     <div className="d-flex justify-content-center mt-5 mb-5">
                         {renderSignUpButton(false)}
                         {renderEditButton(isCreator)}
+                        {renderLadderButton()}
                     </div>
                     {renderSponsors()}
                 </div>
+                <EditTournamentModal onClose={toggleEditTorunamentModal} tournamentId={id} />
+                <TournamentSignUpModal onClose={() => setShowSignUpModal(false)} onSignUp={handleSignUp} />
+                <Popup title={popupTitle} message={popupMessage} show={showPopup} onClose={() => setShowPopup(false)} />
+                <LadderModal participants={participants} onClose={() => setShowLadderModal(false)} tournament_id={id} />
+
             </div>
         );
     }
@@ -292,9 +340,15 @@ const TournamentDetails = () => {
                     <div className="d-flex justify-content-center mt-5 mb-5">
                         {renderSignUpButton(true)}
                         {renderEditButton(isCreator)}
+                        {renderLadderButton()}
                     </div>
                     {renderSponsors()}
                 </div>
+                <EditTournamentModal onClose={toggleEditTorunamentModal} tournamentId={id} />
+                <TournamentSignUpModal onClose={() => setShowSignUpModal(false)} onSignUp={handleSignUp} />
+                <Popup title={popupTitle} message={popupMessage} show={showPopup} onClose={() => setShowPopup(false)} />
+                <LadderModal participants={participants} onClose={() => setShowLadderModal(false)} tournament_id={id} />
+
             </div>
         );
     }

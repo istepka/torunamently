@@ -7,7 +7,7 @@ const Header = () => {
     return (
         <div className="header-container">
             <Link to="/" className="logo-link">
-                <img className="logo" src="./logo192.png" alt="Logo" width="30" height="30" />
+            <img className="logo" src={process.env.PUBLIC_URL + '/logo192.png'} alt="Logo" width="30" height="30" />
                 <span className="website-name">Tournamently</span>
             </Link>
         </div>

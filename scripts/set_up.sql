@@ -54,3 +54,12 @@ CREATE TABLE tournamently.TOURNAMENT_RESULTS (
     FOREIGN KEY (participant1) REFERENCES tournamently.USERS(email),
     FOREIGN KEY (participant2) REFERENCES tournamently.USERS(email)
 );
+
+CREATE TABLE tournamently.LADDER (
+    tournament_id INT NOT NULL,
+    participant VARCHAR(255) NOT NULL,
+    idx INT NOT NULL,
+    PRIMARY KEY (tournament_id, participant),
+    FOREIGN KEY (tournament_id) REFERENCES tournamently.TOURNAMENTS(id),
+    FOREIGN KEY (participant) REFERENCES tournamently.USERS(email)
+);

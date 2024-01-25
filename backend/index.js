@@ -13,7 +13,8 @@ import {
     createTournament, getTournamentDetailsById,
     getSponsorsByTournamentId, checkIfUserIsSignedUpToTournament,
     isUserTournamentCreator, signUpUserToTournament,
-    getTournamentParticipants
+    getTournamentParticipants, updateTournament,
+    getLadder, getResultsForTournament
 } from "./utils/db_ops.js";
 
 const app = express()
@@ -417,6 +418,116 @@ app.get("/get_tournament_participants", async (req, res) => {
     }
 });
 
+app.post("/update_tournament", async (req, res) => {
+    const { id } = req.query;
+    const { tournamentData, sponsors, token } = req.body;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": {} });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": {} });
+            } else {
+                // Token is valid
+
+                try {
+                    const updateResult = await updateTournament(id, tournamentData, sponsors);
+
+                    // Send the structured response
+                    res.send(updateResult);
+                } catch (error) {
+                    console.error('Error updating tournament:', error);
+                    res.send({ "status": "error", "message": "Database error", "data": {} });
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send({ "status": "error", "message": "Internal Server Error", "data": {} });
+    }
+});
+
+// Get or create ladder out of tournament participants
+app.get("/fetch_ladder", async (req, res) => {
+    const { token, tournament_id } = req.query;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": [] });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": [] });
+            } else {
+                // Token is valid
+
+                try {
+                    const ladder = await getLadder(tournament_id);
+
+                    // Send the structured response
+                    res.send({ "status": "success", "message": "Success", "data": ladder });
+                } catch (error) {
+                    console.error('Error fetching ladder:', error);
+                    res.send({ "status": "error", "message": "Database error", "data": [] });
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+// Get records for a tournament from tournament results table
+app.get("/fetch_results_for_tournament", async (req, res) => {
+    const { token, tournament_id } = req.query;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": [] });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": [] });
+            } else {
+                // Token is valid
+
+                try {
+                    const results = await getResultsForTournament(tournament_id);
+
+                    // Send the structured response
+                    res.send({ "status": "success", "message": "Success", "data": results });
+                }
+                catch (error) {
+                    console.error('Error fetching results:', error);
+                    res.send({ "status": "error", "message": "Database error", "data": [] });
+                }
+            }
+        }
+        )
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+
+});
 
 
 app.listen(8801, () => {

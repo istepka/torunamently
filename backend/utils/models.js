@@ -207,6 +207,32 @@ const TournamentResults = db.define(
     }
 );
 
+// Define LADDER
+const Ladder = db.define(
+    "Ladder",
+    {
+        tournament_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        participant: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        idx: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+    },
+    {
+        tableName: "LADDER",
+        timestamps: false,
+        primaryKey: {
+            fields: ["tournament_id", "participant"],
+        },
+    }
+);
+
 // Define relationships between models
 Tournaments.belongsTo(Users, { foreignKey: "creator" });
 TournamentParticipants.belongsTo(Tournaments, { foreignKey: "tournament_id" });
@@ -216,6 +242,9 @@ TournamentSponsors.belongsTo(Sponsors, { foreignKey: "sponsor_name" });
 TournamentResults.belongsTo(Tournaments, { foreignKey: "tournament_id" });
 TournamentResults.belongsTo(Users, { foreignKey: "participant1" });
 TournamentResults.belongsTo(Users, { foreignKey: "participant2" });
+Ladder.belongsTo(Tournaments, { foreignKey: "tournament_id" });
+Ladder.belongsTo(Users, { foreignKey: "participant" });
+
 
 // Export models
-export { Users, Tournaments, TournamentParticipants, Sponsors, TournamentSponsors, TournamentResults };
+export { Users, Tournaments, TournamentParticipants, Sponsors, TournamentSponsors, TournamentResults, Ladder };
