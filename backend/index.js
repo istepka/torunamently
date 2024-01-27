@@ -112,6 +112,26 @@ app.get("/verify_account", async (req, res) => {
     }
 });
 
+app.get("/verify_token", async (req, res) => {
+    const { token } = req.query;
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, (err, decoded) => {
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": {} });
+            } else {
+                // Token is valid
+                res.send({ "status": "success", "message": "Success", "data": {} });
+            }
+        });
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 app.get("/get_list_of_tournaments_user_is_signed_up_to", async (req, res) => {
     const { token, email } = req.query;
     console.log("email: " + email);

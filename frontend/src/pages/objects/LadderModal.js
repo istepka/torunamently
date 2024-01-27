@@ -80,34 +80,68 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
         console.log(stages);
 
 
-        // Generate html
-        // Each stage is a column
-        // Each pair should occupy two vertical next to eachorther cells
-        // Between each stage there should be a vertical line separating them with some large margins
-        // Between each pait vertically there should be a horizontal line separating them with some large margins
+            // Generate html
+            // Each stage is a column
+            // Each pair should occupy two vertical next to eachorther cells
+            // Between each stage there should be a vertical line separating them with some large margins
+            // Between each pait vertically there should be a horizontal line separating them with some large margins
             // Generate HTML
             const columns = [];
             stages.forEach((stage, stageIndex) => {
+                
+                var added_rows = 0;
                 columns.push(
-                <td key={stageIndex} style={{  paddingRight: '20px', paddingLeft: '20px' }} className="text-center mt-4 mb-4">
-                    {stage.map((pair, pairIndex) => (
-                        <React.Fragment key={pairIndex}>
-                            <tr className="text-center mt-4">
-                                <td className="border border-dark font-weight-bold">{pair.participant}</td>
-                            </tr>
-                            <tr className="text-center mb-4">
-                                <td className="border border-dark">{pair.idx}</td>
-                            </tr>
-                            { pairIndex % 2 === 1 && pairIndex !== stage.length - 1 && (
-                                <tr className="text-center mt-4 mb-4">
-                                    <td className="">&nbsp;</td>
-                                </tr>
-                            )}
-                            
-                        </React.Fragment>
-                    ))}
-                </td>
+                    <td key={stageIndex}>
+                        {stage.map((pair, pairIndex) => (
+                            <React.Fragment key={pairIndex}>
+
+                                { pairIndex % 2 === 0 && pairIndex !== stage.length - 1  ? (
+                                    <tr className="text-left">
+                                        <td className="font-weight-bold border-3 border-bottom-0 border-top-3">{pair.participant}</td>
+                                    </tr>
+                                ) : (
+                                    <tr className="text-left">
+                                        <td className="font-weight-bold border-3 border-top-0">{pair.participant}</td>
+                                    </tr>
+                                )}
+
+                                { pairIndex % 2 === 1 && (
+                                    <tr className="text-center border-3">
+                                        <td className="border-0">Score: </td>
+                                    </tr>
+                                ) }
+                                { pairIndex % 2 === 1 &&  (
+                                    <tr className="text-center  border-0">
+                                        <td className="border-0">&nbsp;</td>
+                                    </tr>
+                                )}
+                                
+                            </React.Fragment>
+                        ))}
+                    </td>
                 );
+
+                added_rows = columns[stageIndex].props.children.length;
+                
+                // Add another column with empty cells to fill the space between stages
+                if (stageIndex !== stages.length - 1) {
+                    columns.push(
+                        <td key={"empty-" + stageIndex.toString()}>
+                            {Array.from({ length: added_rows }).map((_, index) => (
+                                <React.Fragment key={"empty-" + stageIndex.toString() + "-" + index.toString()}>
+                                    <tr className="text-center border-0">
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr className="text-center border-0">
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                </React.Fragment>
+                            ))}
+                        </td>
+                    );
+                }
+
+                
                 
             }
 
@@ -140,7 +174,9 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                     <div>
                         <table className="table">
                             <tbody>
-                                {generateLadderTable()}
+                                { !loading ? (
+                                    generateLadderTable()
+                                ) : (<div></div>)}
                             </tbody>
                         </table>
                     </div>

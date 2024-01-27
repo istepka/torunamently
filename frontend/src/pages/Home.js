@@ -14,6 +14,7 @@ const Home = () => {
     const [sigedUpToTournys, setSignedUpToTournys] = useState([]);
     const [tournamentsPerPage] = useState(10); 
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
         const fetchAllTournaments = async () => {
@@ -50,7 +51,36 @@ const Home = () => {
         getListOfTournamentsUserIsSignedUpTo();
 
 
-    }, [setSignedUpToTournys])
+        // Other logic
+        const checkIsAuthenticated = () => {
+            // Check if the user has a valid token
+            const token = localStorage.getItem('token');
+
+            
+            if (!token) {
+                return false;
+            }
+
+            // Ask the server if the token is valid
+            axios.get(`http://localhost:8801/verify_token?token=${token}`)
+                .then(res => {
+                    console.log(res.data)
+                    // only if success
+                    if (res.data.status === "success") {
+                        setIsAuthenticated(true);
+                        return true;
+                    }
+                })
+                .catch(err => {
+                    setIsAuthenticated(false);
+                    console.log(err);
+                })
+
+        };
+        checkIsAuthenticated();
+
+
+    }, [setSignedUpToTournys, setIsAuthenticated]);
 
     function formatDate(date) {
        // return in format: 2021-05-01 12:00
@@ -81,12 +111,7 @@ const Home = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Other logic
-    const isAuthenticated = () => {
-        // Check if the user has a valid token
-        const token = localStorage.getItem('token');
-        return token !== null && token !== undefined;
-    };
+
 
 
 
@@ -111,7 +136,7 @@ const Home = () => {
                 <div className="row mb-3 mt-3">
 
                     <div className="col-sm d-flex justify-content-end align-items-center">
-                        {isAuthenticated() ? (
+                        {isAuthenticated ? (
                             // If user is authenticated, show user's email button
                             <div>
                                 <button className="btn btn-success ml-2" data-toggle="modal" data-target="#createTournamentModal">Create Tournament</button>
@@ -139,7 +164,7 @@ const Home = () => {
                                 <th scope="col">Max Participants</th>
                                 <th scope="col">Application Deadline</th>
                                 <th scope="col">Creator</th>
-                                {isAuthenticated() ? (
+                                {isAuthenticated ? (
                                     <th scope="col">User signed up</th>
                                 ) : (<th scope="col" style={{display: "none"}}>User signed up</th>)}
                                 <th scope="col">More</th>
@@ -157,7 +182,7 @@ const Home = () => {
                                     <td>{tournament.max_participants}</td>
                                     <td>{formatDate(tournament.app_deadline)}</td>
                                     <td>{tournament.creator}</td>
-                                    {isAuthenticated() ? (
+                                    {isAuthenticated ? (
                                         <td>
                                             {checkIfUserSignedUpToTourny(tournament.id) ? (
                                                 <p>Yes</p>
@@ -169,7 +194,7 @@ const Home = () => {
                                     {/* Add a Link column */}
                                     <td>
                                         <Link
-                                            to={isAuthenticated() ?  `/tournament-details/${tournament.id}` : `/login`}
+                                            to={isAuthenticated ?  `/tournament-details/${tournament.id}` : `/login`}
                                             className="btn btn-outline-primary btn-sm"
                                             style={{ textDecoration: 'none' }}
                                         >
