@@ -22,7 +22,7 @@ const Account = () => {
                     <p className="account-value">{localStorage.getItem("email")}</p>
                 </div>
                 
-                <button className="btn btn-danger" onClick={logOut}>Log Out</button>
+                <button className="btn btn-danger logout-button" onClick={logOut}>Log Out</button>
             </div>
         </div>
     );

@@ -2,13 +2,19 @@
 .account-container {
     text-align: center;
     margin-top: 50px;
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: auto auto auto;
+    grid-template-areas: "header" "main" "footer";
 }
 
 .account-title {
+    grid-area: header;
     color: #007bff; /* Bootstrap primary color */
 }
 
 .account-details {
+    grid-area: main;
     margin-top: 20px;
 }
 
@@ -20,4 +26,10 @@
 .account-value {
     font-size: 18px;
     color: #333; /* Dark text color */
+}
+
+.logout-button {
+    grid-area: footer;
+    justify-self: center;
+
 }

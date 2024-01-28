@@ -244,9 +244,9 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
         if (!supported_lengths.includes(participants.length)) {
             return (
                 <div className='alert alert-danger' role='alert'>
-                    <p>Unsupported number of participants. </p>
-                    <p>  Supported numbers are: {supported_lengths.join(', ')}. </p>
-                    <p>Current number of participants: {participants.length}.</p>
+                    Unsupported number of participants. <br />
+                    Supported numbers are: {supported_lengths.join(', ')}. <br />
+                    Current number of participants: {participants.length}.
                 </div>
             );
         }
@@ -365,14 +365,14 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
             if (stageIndex !== 0) {
                 const howMany = stageIndex;
                 for (let i = 0; i < howMany; i++) {
-                    tmp.unshift({ participant1: 'DUMMY1' + stageIndex, participant2: 'DUMMY2' + stageIndex, score1: null, score2: null, verified: null, editableByUser: null });
+                    tmp.unshift({ participant1: 'DUMMY1' + stageIndex + i, participant2: 'DUMMY2' + stageIndex + i, score1: null, score2: null, verified: null, editableByUser: null });
                 }
             }
         
             columns.push(
                 <td key={stageIndex} className="fixed-width-column">
                     {tmp.map((match) => {
-                        if (match.participant1 !== 'DUMMY1' + stageIndex) {
+                        if (!match?.participant1?.includes('DUMMY')) {
                             return (
                                 <React.Fragment key={match.participant1 + match.participant2}>
                                     <tr className="text-left">

@@ -7,3 +7,21 @@
     text-align: center;
     vertical-align: middle;
 }
+
+.container {
+    display: grid;
+    grid-template-columns:  80% 20% ;
+    grid-template-rows: auto;
+    grid-template-areas: 
+    "header header2"
+    "main main"
+    "footer footer";
+}
+
+.buttons {
+    grid-area: header;
+}
+
+.center-table {
+    grid-area: main;
+}

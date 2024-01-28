@@ -133,15 +133,15 @@ const Home = () => {
             <Header />
             <div className="container">
 
-                <div className="row mb-3 mt-3">
+                <div className="buttons">
 
-                    <div className="col-sm d-flex justify-content-end align-items-center">
+                    <div className="mt-2 mb-2">
                         {isAuthenticated ? (
                             // If user is authenticated, show user's email button
-                            <div>
-                                <button className="btn btn-success ml-2" data-toggle="modal" data-target="#createTournamentModal">Create Tournament</button>
+                            <div className="group">
+                                <a href="/account" className="btn btn-primary mr-2">{localStorage.getItem('email')}</a>
+                                <button className="btn btn-success" data-toggle="modal" data-target="#createTournamentModal">Create Tournament</button>
 
-                                <a href="/account" className="btn btn-primary ml-2">{localStorage.getItem('email')}</a>
                             </div>
 
                         ) : (
@@ -151,7 +151,7 @@ const Home = () => {
                     </div>
                 </div>
 
-                <div className="row mb-3">
+                <div className="center-table">
                     <table id="tournamentsTable" className="table table-sm table-striped table-hover table-bordered">
                         <thead className="thead-dark center-titles">
                             <tr>

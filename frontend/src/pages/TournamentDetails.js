@@ -5,13 +5,20 @@ import Header from './Header';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import { MapContainer, TileLayer, Marker, Popup  } from 'react-leaflet'
-import 'leaflet/dist/leaflet.css';
+// import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import EditTournamentModal from './objects/EditTorunamentModal';
 import TournamentSignUpModal from './objects/TournamentSignUpModal';
 import { SystemPopup } from './objects/Popup';
 import LadderModal from './objects/LadderModal';
 import './styles/TournamentDetails.css';
+// import marker from '../../Assets/icons/Location.svg';
+// import { Icon } from 'leaflet'
+
+// const myIcon = new Icon({
+//  iconUrl: marker,
+//  iconSize: [32,32]
+// })
 
 
 
@@ -90,7 +97,6 @@ const TournamentDetails = () => {
         }
 
         fetchParticipants();
-
 
         const checkIfSignedUpToTournament = async () => {
             try {
@@ -230,7 +236,7 @@ const TournamentDetails = () => {
 
     function renderSponsors() {
         return (
-            <div className='mt-3 mb-3'>
+            <div className='mt-3 mb-3 sponsors-container'>
                 <hr/>
                 <h1 className="mb-4 text-center">Sponsors</h1>
                 <div className="row mt-3 mb-3 ">
@@ -281,11 +287,13 @@ const TournamentDetails = () => {
             geo_coordinates_parsed = geo_coordinates_parsed.map(parseFloat);  
         }
 
-        const position = isGeoCoordinatesValid ? [geo_coordinates_parsed[0], geo_coordinates_parsed[1]] : [0, 0];
-        console.log('position: ', position);
+        var position = isGeoCoordinatesValid ? [geo_coordinates_parsed[0], geo_coordinates_parsed[1]] : [0, 0];
+        //Convert to array of floats
+        position = position.map(parseFloat);
+        console.log('position: ', position, typeof(position[0]), typeof(position[1]), typeof(position));
         return (
             <div className='tournament-details-container'>
-                <div className="tournament-details">
+                <div className="tournament-details m-2">
                     <h1 className="mb-4">{tournament.name}</h1>
                     <p className="mb-2"><strong>Discipline:</strong> {tournament.discipline}</p>
                     <p className="mb-2"><strong>Time:</strong> {formatDate(tournament.time)}</p>
@@ -296,9 +304,10 @@ const TournamentDetails = () => {
                     <p className="mb-2"><strong>Creator:</strong> {tournament.creator}</p>
                 </div>
 
-                <div className='map-container'>
+                <div className='map-container m-2'>
                     <h2 className="mb-3 text-center">Map</h2>
-                        <MapContainer center={position} zoom={5} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+                    { isGeoCoordinatesValid ? (
+                        <MapContainer center={position} zoom={position ? 1 : 15} scrollWheelZoom={true} style={{ height: '80%', width: '100%' }}>
                             <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -309,8 +318,14 @@ const TournamentDetails = () => {
                             </Popup>
                             </Marker>
                         </MapContainer>
+                    ) : (
+                        <div className="alert alert-danger" role="alert">
+                            Invalid Geo Coordinates <br /> Coordinates: {tournament.geo_coordinates} <br /> Please contact the tournament creator.
+                        </div>
+                    )
+                    }
                 </div>
-                <div className='participants-list'>
+                <div className='participants-list m-2'>
                     <h2>Participants</h2>
                     <ol className="list-unstyled mb-0">
                         {participants.map((participant, index) => (
@@ -345,19 +360,19 @@ const TournamentDetails = () => {
     }
     
 
-    if (!isAuthenticated || isSignedUp) {
+    if ((!isAuthenticated || isSignedUp) && tournament) {
         console.log('User is not authenticated and not signed up: ', isAuthenticated, isSignedUp);
         return (
             <div>
                 <Header />
                 <div className="container mt-3 mb-3">
                     {renderTournamentDetails()}
-                    <div className="d-flex justify-content-center mt-5 mb-5">
+                    <div className="d-flex justify-content-center mt-5 mb-5 tournament-details-buttons">
                         {renderSignUpButton(false)}
                         {renderEditButton(isCreator)}
                         {renderLadderButton()}
                     </div>
-                    {renderSponsors()}
+                    {sponsors.length > 0 && renderSponsors()}
                 </div>
                 <EditTournamentModal onClose={toggleEditTorunamentModal} tournamentId={id} />
                 <TournamentSignUpModal onClose={() => setShowSignUpModal(false)} onSignUp={handleSignUp} />
@@ -372,14 +387,16 @@ const TournamentDetails = () => {
         return (
             <div>
                 <Header />
-                <div className="container mt-3 mb-3">
-                    {renderTournamentDetails()}
-                    <div className="d-flex justify-content-center mt-5 mb-5">
-                        {renderSignUpButton(true)}
-                        {renderEditButton(isCreator)}
-                        {renderLadderButton()}
-                    </div>
-                    {renderSponsors()}
+                <div className="container container-t mt-3 mb-3 ">
+                        <div>
+                            {renderTournamentDetails()}
+                            <div className="tournament-details-buttons mt-2 mb-2">
+                                {renderSignUpButton(true)}
+                                {renderEditButton(isCreator)}
+                                {renderLadderButton()}
+                            </div>
+                            { sponsors.length > 0 && renderSponsors() }
+                        </div>
                 </div>
                 <EditTournamentModal onClose={toggleEditTorunamentModal} tournamentId={id} />
                 <TournamentSignUpModal onClose={() => setShowSignUpModal(false)} onSignUp={handleSignUp} />
