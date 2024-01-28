@@ -469,7 +469,43 @@ async function getResultsForTournament(tournamentId) {
     }
 }
 
+async function updateMatchupScore(tournamentId, participant1, participant2, score1, score2, verified) {
+    try {
+        const result = await TournamentResults.update({
+            score1: score1,
+            score2: score2,
+            verified: verified,
+        }, {
+            where: {
+                tournament_id: tournamentId,
+                participant1: participant1,
+                participant2: participant2,
+            },
+        });
 
+        return result;
+    } catch (error) {
+        throw new Error(`Error updating matchup score: ${error.message}`);
+    }
+}
+
+async function addMatchup(tournamentId, participant1, participant2) {
+    try {
+        console.log('Adding matchup: ', tournamentId, participant1, participant2);
+        const matchup = await TournamentResults.create({
+            tournament_id: tournamentId,
+            participant1: participant1,
+            participant2: participant2,
+            score1: -1,
+            score2: -1,
+            verified: false,
+        }, { fields: ['tournament_id', 'participant1', 'participant2', 'score1', 'score2', 'verified'] });
+
+        return matchup;
+    } catch (error) {
+        throw new Error(`Error adding matchup: ${error.message}`);
+    }
+}
 
 
 export { 
@@ -494,4 +530,6 @@ export {
     updateTournament,
     getLadder,
     getResultsForTournament,
+    updateMatchupScore,
+    addMatchup,
 };

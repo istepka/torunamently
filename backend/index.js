@@ -14,7 +14,8 @@ import {
     getSponsorsByTournamentId, checkIfUserIsSignedUpToTournament,
     isUserTournamentCreator, signUpUserToTournament,
     getTournamentParticipants, updateTournament,
-    getLadder, getResultsForTournament
+    getLadder, getResultsForTournament, 
+    updateMatchupScore, addMatchup
 } from "./utils/db_ops.js";
 
 const app = express()
@@ -549,6 +550,84 @@ app.get("/fetch_results_for_tournament", async (req, res) => {
 
 });
 
+
+app.post("/update_matchup_score", async (req, res) => {
+    const { token, tournament_id, participant1, participant2, score1, score2, verified} = req.body;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token"});
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                res.send({ "status": "error", "message": "Invalid token"});
+            } else {
+                // Token is valid
+
+                try {
+                    const results = await updateMatchupScore(tournament_id, participant1, participant2, score1, score2, verified);
+
+                    // Send the structured response
+                    res.send({ "status": "success", "message": "Success"});
+                }
+                catch (error) {
+                    console.error('Error updating matchup score:', error);
+                    res.send({ "status": "error", "message": "Database error"});
+                }
+            }
+        }
+        )
+    }
+    catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+
+});
+
+
+app.post("/add_matchup", async (req, res) => {
+    const { token, tournament_id, participant1, participant2} = req.body;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token"});
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                res.send({ "status": "error", "message": "Invalid token"});
+            } else {
+                // Token is valid
+
+                try {
+                    const results = await addMatchup(tournament_id, participant1, participant2);
+
+                    // Send the structured response
+                    res.send({ "status": "success", "message": "Success"});
+                }
+                catch (error) {
+                    console.error('Error adding matchup:', error);
+                    res.send({ "status": "error", "message": "Database error"});
+                }
+            }
+        }
+        )
+    }
+    catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+
+}
+);
 
 app.listen(8801, () => {
     console.log("Backend server is running! Port: 8801");

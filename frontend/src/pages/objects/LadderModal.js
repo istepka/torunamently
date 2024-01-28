@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import "../styles/Ladder.css"
+import Popup from './Popup';
 
 
 const LadderModal = ({ participants, onClose, tournament_id }) => {
@@ -11,47 +12,58 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
     const [loading, setLoading] = useState(false);
     const [ladderInit, setLadderInit] = useState(null); // Array of (participant, idx)
     const [results, setResults] = useState([]);
+    
+    const [popupMessage, setPopupMessage] = useState('');
+    const [popupTitle, setPopupTitle] = useState(''); 
+    const [showPopup, setShowPopup] = useState(false);
+
 
     useEffect(() => {
+        const fetchLadder = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:8801/fetch_ladder', { params: { token, tournament_id } });
+    
+                if (response.data.status === 'success') {
+                    setLadderInit(response.data.data);
+                    console.log('Ladder:', response.data.data)
+                } else {
+                    console.error(response.data.message);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+            setLoading(false);
+        };
+    
+        const fetchScoresForTournament = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:8801/fetch_results_for_tournament', { params: { token, tournament_id } });
+                
+                if (response.data.status === 'success') {
+                    setResults(response.data.data);
+                    console.log('Ladder scores:', response.data.data)
+                } else {
+                    console.error('Error fetching scores for tournament:', response.data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching scores for tournament:', error);
+            }
+            setLoading(false);
+        }
         fetchLadder();
         fetchScoresForTournament();
     }, [participants]);
 
-    const fetchLadder = async () => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8801/fetch_ladder', { params: { token, tournament_id } });
-
-            if (response.data.status === 'success') {
-                setLadderInit(response.data.data);
-                console.log('Ladder:', response.data.data)
-            } else {
-                console.error(response.data.message);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-        setLoading(false);
-    };
-
-    const fetchScoresForTournament = async () => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8801/fetch_results_for_tournament', { params: { token, tournament_id } });
-
-            if (response.data.status === 'success') {
-                setResults(response.data.data);
-                console.log('Ladder scores:', response.data.data)
-            } else {
-                console.error('Error fetching scores for tournament:', response.data.message);
-            }
-        } catch (error) {
-            console.error('Error fetching scores for tournament:', error);
-        }
-        setLoading(false);
+    function showPopupMessage(title, message) {
+        setPopupTitle(title);
+        setPopupMessage(message);
+        setShowPopup(true);
     }
+
 
     function checkMatchupScore(participant1, participant2) {
         // Check if there is a score for this matchup
@@ -71,6 +83,7 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
 
     function verifyMatchupScore(participant1, participant2) {
         console.log('Verifying matchup score:', participant1, participant2);
+        setLoading(true);
 
         // Check if score1 and score2 are not null and are the same
         const matchup = results.find((matchup) => {
@@ -81,14 +94,74 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
         // Update score of the matchup
 
         if (matchup) {
-            if (matchup.score1 !== null && matchup.score2 !== null && matchup.score1 == matchup.score2) {
+            if (matchup.score1 !== -1 && matchup.score2 !== -1 && matchup.score1 === matchup.score2) {
                 // Update verified
                 matchup.verified = true;
+                console.log('Updating matchup score:', matchup);
+
+                // Update in database
+                const token = localStorage.getItem('token');
+                axios.post('http://localhost:8801/update_matchup_score', { token, tournament_id, participant1, participant2, score1: matchup.score1, score2: matchup.score2, verified: matchup.verified })
+                    .then((response) => {
+                        if (response.data.status === 'success') {
+                            console.log('Successfully updated matchup score.');
+                            showPopupMessage('Success', 'Successfully updated matchup score and verified it.');
+                        }
+                        else {
+                            console.error('Error updating matchup score:', response.data.message);
+                            showPopupMessage('Error', 'Error updating matchup score. It was not verified.');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error updating matchup score:', error);
+                        showPopupMessage('Error', 'Error updating matchup score. It was not verified.');
+                    });
+
+            }
+            else if (matchup.score1 === -1 || matchup.score2 === -1) {
+                //Here we update the database but we need to wait for the other player to update the score
+                console.log('Updating matchup score:', matchup);
+                
+                const token = localStorage.getItem('token');
+                axios.post('http://localhost:8801/update_matchup_score', { token, tournament_id, participant1, participant2, score1: matchup.score1, score2: matchup.score2, verified: matchup.verified })
+                    .then((response) => {
+                        if (response.data.status === 'success') {
+                            console.log('Successfully updated matchup score.');
+                            showPopupMessage('Success', 'Successfully updated matchup score. But, we need to wait for the other player to update the score as well.');
+                        }
+                        else {
+                            console.error('Error updating matchup score:', response.data.message);
+                            showPopupMessage('Error', 'Error updating matchup score. It was not verified.');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error updating matchup score:', error);
+                        showPopupMessage('Error', 'Error updating matchup score. It was not verified.');
+                    });
+
             }
             else {
                 console.error('Scores:', matchup.score1, matchup.score2, 'are not valid. They should be equal.');
+                
+                const token = localStorage.getItem('token');
+                axios.post('http://localhost:8801/update_matchup_score', { token, tournament_id, participant1, participant2, score1: -1, score2: -1, verified: false })
+                .then((response) => {
+                    if (response.data.status === 'success') {
+                        console.log('Successfully updated matchup score.');
+                    }
+                    else {
+                        console.error('Error updating matchup score:', response.data.message);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error updating matchup score:', error);
+                });
+
+                showPopupMessage('Error', 'Scores are not valid. They should be equal. Please try again.');
             }
         }
+
+        setLoading(false);
     }
 
     function onChangeForMatchupScore(event, participant1, participant2) {
@@ -108,10 +181,12 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
         if (matchup) {
             // Update existing score
             if (matchup.participant1 === currentUser) {
-                matchup.score1 = selectedValue;
+                 //selectedValue to int 
+                matchup.score1 = parseInt(selectedValue);
+
             }
             else if (matchup.participant2 === currentUser) {
-                matchup.score2 = selectedValue;
+                matchup.score2 = parseInt(selectedValue);
             }
             else {
                 console.error('User is not a participant in this matchup. They should not be able to select a score.');
@@ -135,6 +210,33 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
             return false;
         }
     } 
+
+    function checkOrAddMatchup(participant1, participant2) {
+        // Check if there is a score for this matchup
+        const matchup = results.find((matchup) => {
+            return (matchup.participant1 === participant1 && matchup.participant2 === participant2) ||
+                (matchup.participant1 === participant2 && matchup.participant2 === participant1);
+        });
+
+        // If there is no score, add it
+        if (!matchup) {
+            const token = localStorage.getItem('token');
+
+            axios.post('http://localhost:8801/add_matchup', { token, tournament_id, participant1, participant2 })
+                .then((response) => {
+                    if (response.data.status === 'success') {
+                        console.log('Successfully added matchup.');
+                    }
+                    else {
+                        console.error('Error adding matchup:', response.data.message);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error adding matchup:', error);
+                });
+        }
+    }
+
     
 
 
@@ -190,47 +292,53 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                     const previous_stage = stages[stages.length - 1];
 
                     // Match 1
-                    const previous_match1 = previous_stage[i / 2];
+                    const previous_match1 = previous_stage[i];
                     const previous_match1_score1 = previous_match1.score1;
                     const previous_match1_verified = previous_match1.verified;
 
                     if (previous_match1_verified) {
-                        previous_mathch1_winner = previous_match1_score1 === 1 ? previous_match1.participant1 : previous_match1.participant2;
+                        previous_mathch1_winner = previous_match1_score1 === 1 ? previous_match1.participant2 : previous_match1.participant1;
                     }
 
                     // Match 2
-                    const previous_match2 = previous_stage[i / 2 + 1];
+                    const previous_match2 = previous_stage[i + 1];
                     const previous_match2_score1 = previous_match2.score1;
                     const previous_match2_verified = previous_match2.verified;
 
                     if (previous_match2_verified) {
-                        previous_mathch2_winner = previous_match2_score1 === 1 ? previous_match2.participant1 : previous_match2.participant2;
+                        previous_mathch2_winner = previous_match2_score1 === 1 ? previous_match2.participant2 : previous_match2.participant1;
                     }
 
                     // Check if there is a score for this matchup
                     const matchup_score = checkMatchupScore(previous_mathch1_winner, previous_mathch2_winner);
 
-                    var score1 = null;
-                    var score2 = null;
+                    // If there is no score, add it
+                    if (!matchup_score && previous_mathch1_winner && previous_mathch2_winner) {
+                        checkOrAddMatchup(previous_mathch1_winner, previous_mathch2_winner);
+                    }
+
+                    var score1 = -1;
+                    var score2 = -1;
                     var verified = false;
-                    var editableByUser = false;
+                    var editableByUser = notVerifiedAndEditable(previous_mathch1_winner, previous_mathch2_winner);
 
                     if (matchup_score) {
                         score1 = matchup_score[0];
                         score2 = matchup_score[1];
                         verified = matchup_score[2];
-                        editableByUser = notVerifiedAndEditable(previous_mathch1_winner, previous_mathch2_winner);
                     }
                     
 
                     const match = {
                         participant1: previous_mathch1_winner,
                         participant2: previous_mathch2_winner,
-                        score1: null,
-                        score2: null,
-                        verified: false,
-                        editableByUser: false,
+                        score1: score1,
+                        score2: score2,
+                        verified: verified,
+                        editableByUser: editableByUser,
                     };
+
+                    console.log('Match:', match);
                     stage.push(match);
                 }
             }
@@ -257,10 +365,10 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                         {stage.map((match) => (
                             <React.Fragment key={match.participant1 + match.participant2}>
                                 <tr className="text-left">
-                                    <td className="font-weight-bold border-3 border-bottom-0 border-top-3 border-dark">[0] {match.participant1}</td>
+                                    <td className="font-weight-bold border-3 border-bottom-0 border-top-3 border-dark">[0] {match.participant1 ? match.participant1 : 'TBA'}</td>
                                 </tr>
                                 <tr className="text-left">
-                                    <td className="font-weight-bold border-3 border-top-0">[1] {match.participant2}</td>
+                                    <td className="font-weight-bold border-3 border-top-0">[1] {match.participant2 ? match.participant2 : 'TBA'}</td>
                                 </tr>
                                 <tr className="text-center border-3">
                                     <td className="border-0">
@@ -299,20 +407,20 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
             // Add another column with empty cells to fill the space between stages
             if (stageIndex !== stages.length - 1) {
                 columns.push(
-                    <td key={"empty-" + stageIndex.toString()} className="empty-col">
+                    <td key={"empty-" + stageIndex.toString()} className="empty-col empty-td">
                         {Array.from({ length: added_rows }).map((_, index) => (
                             <React.Fragment key={"empty-" + stageIndex.toString() + "-" + index.toString()}>
                                 <tr className="">
-                                    <td className="border-0">&nbsp;</td>
+                                    <td className="border-0 empty-td">&nbsp;</td>
                                 </tr>
                                 <tr className="">
-                                    <td className="border-0">&nbsp;</td>
+                                    <td className="border-0 empty-td">&nbsp;</td>
                                 </tr>
                                 <tr className="">
-                                    <td className="border-0">&nbsp;</td>
+                                    <td className="border-0 empty-td">&nbsp;</td>
                                 </tr>
                                 <tr className="">
-                                    <td className="border-0">&nbsp;</td>
+                                    <td className="border-0 empty-td">&nbsp;</td>
                                 </tr>
                             </React.Fragment>
                         ))}
@@ -368,6 +476,7 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
             </div>
         </div>
     </div>
+    <Popup title={popupTitle} message={popupMessage} onClose={() => setShowPopup(false)} show={showPopup} />
 </div>
 
     );

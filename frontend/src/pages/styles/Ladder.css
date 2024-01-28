@@ -6,12 +6,16 @@
     width: 150px;
 }
 
-.modal-ladder {
+/* .modal-ladder {
     max-width: 90vw;
     max-height: 90vh;
     min-width: 85vw;
-}
+} */
 
 td {
     min-width: 300px;
+}
+
+.empty-td {
+    min-width: 74px;
 }
