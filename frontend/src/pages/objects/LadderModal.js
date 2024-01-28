@@ -237,10 +237,6 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
         }
     }
 
-    
-
-
-
     const generateLadderTable = () => {
         if (!ladderInit || ladderInit.length === 0) return null;
 
@@ -350,60 +346,97 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
         console.log('Stages:', stages);
 
 
-            // Generate html
-            // Each stage is a column
-            // Each pair should occupy two vertical next to eachorther cells
-            // Between each stage there should be a vertical line separating them with some large margins
-            // Between each pait vertically there should be a horizontal line separating them with some large margins
-            // Generate HTML
-            const columns = [];
-            stages.forEach((stage, stageIndex) => {
-                
-                var added_rows = 0;
-                columns.push(
-                    <td key={stageIndex} className="fixed-width-column">
-                        {stage.map((match) => (
-                            <React.Fragment key={match.participant1 + match.participant2}>
-                                <tr className="text-left">
-                                    <td className="font-weight-bold border-3 border-bottom-0 border-top-3 border-dark">[0] {match.participant1 ? match.participant1 : 'TBA'}</td>
-                                </tr>
-                                <tr className="text-left">
-                                    <td className="font-weight-bold border-3 border-top-0">[1] {match.participant2 ? match.participant2 : 'TBA'}</td>
-                                </tr>
-                                <tr className="text-center border-3">
-                                    <td className="border-0">
-                                        <div className="row">
-                                            <div className="col-12 mb-2 d-flex justify-content-between align-items-center">
-                                                <form className="form-inline w-100 ">
-                                                    <label className="w-100 text-center col-6 mb-1">Winner</label>
-                                                    <select id={`select-${match.participant1}-${match.participant2}`} className="form-control w-100 text-center col-4 ml-2" 
-                                                        disabled={match.verified || !match.editableByUser} 
-                                                        defaultValue={ match.verified ? match.score1 : null }
-                                                        onChange={(event) => onChangeForMatchupScore(event, match.participant1, match.participant2)}>
-                                                        <option value={null}>-</option>
-                                                        <option value="0">0</option>
-                                                        <option value="1">1</option>
-                                                    </select>
-                                                </form>
-                                                <button className={`btn btn-${match.verified ? 'secondary' : 'primary'} w-100`} disabled={match.verified || !match.editableByUser}
-                                                    onClick={() => verifyMatchupScore(match.participant1, match.participant2)}>
-                                                    {match.verified ? 'Match ended' : match.editableByUser ? 'Verify' : 'No permission'}
-                                                </button>
-                                            </div>
-                                        </div>                                       
-                                    </td>
-                                </tr>
-                                <tr className="text-center  border-0">
-                                    <td className="border-0 fixed-width-column">&nbsp;</td>
-                                </tr>
-                            </React.Fragment>
-                        ))}
-                    </td>
+        // Generate html
+        // Each stage is a column
+        // Each pair should occupy two vertical next to eachorther cells
+        // Between each stage there should be a vertical line separating them with some large margins
+        // Between each pait vertically there should be a horizontal line separating them with some large margins
+        // Generate HTML
+        const first_stage_length = stages[0].length;
+        const last_stage_index = stages.length - 1;
+        const columns = [];
+        
+        stages.forEach((stage, stageIndex) => {
+            var added_rows = 0;
+        
+            const tmp = stage;
+        
+            // Insert dummy rows in the beginning to align the stages
+            if (stageIndex !== 0) {
+                const howMany = stageIndex;
+                for (let i = 0; i < howMany; i++) {
+                    tmp.unshift({ participant1: 'DUMMY1' + stageIndex, participant2: 'DUMMY2' + stageIndex, score1: null, score2: null, verified: null, editableByUser: null });
+                }
+            }
+        
+            columns.push(
+                <td key={stageIndex} className="fixed-width-column">
+                    {tmp.map((match) => {
+                        if (match.participant1 !== 'DUMMY1' + stageIndex) {
+                            return (
+                                <React.Fragment key={match.participant1 + match.participant2}>
+                                    <tr className="text-left">
+                                        <td className="font-weight-bold border-3 border-bottom-0 border-top-3 border-dark">[0] {match.participant1 ? match.participant1 : 'TBA'}</td>
+                                    </tr>
+                                    <tr className="text-left">
+                                        <td className="font-weight-bold border-3 border-top-0">[1] {match.participant2 ? match.participant2 : 'TBA'}</td>
+                                    </tr>
+                                    <tr className="text-center border-3">
+                                        <td className="border-0">
+                                            <div className="row">
+                                                <div className="col-12 mb-2 d-flex justify-content-between align-items-center">
+                                                    <form className="form-inline w-100 ">
+                                                        <label className="w-100 text-center col-6 mb-1">Winner</label>
+                                                        <select id={`select-${match.participant1}-${match.participant2}`} className="form-control w-100 text-center col-4 ml-2" 
+                                                            disabled={match.verified || !match.editableByUser} 
+                                                            defaultValue={ match.verified ? match.score1 : null }
+                                                            onChange={(event) => onChangeForMatchupScore(event, match.participant1, match.participant2)}>
+                                                            <option value={null}>-</option>
+                                                            <option value="0">0</option>
+                                                            <option value="1">1</option>
+                                                        </select>
+                                                    </form>
+                                                    <button className={`btn btn-${match.verified ? 'secondary' : 'primary'} w-100`} disabled={match.verified || !match.editableByUser}
+                                                        onClick={() => verifyMatchupScore(match.participant1, match.participant2)}>
+                                                        {match.verified ? 'Match ended' : match.editableByUser ? 'Verify' : 'No permission'}
+                                                    </button>
+                                                </div>
+                                            </div>                                       
+                                        </td>
+                                    </tr>
+                                    <tr className="text-center  border-0">
+                                        <td className="border-0 fixed-width-column">&nbsp;</td>
+                                    </tr>
+                                </React.Fragment>
+                            );
+                        } else {
+                            // Return an empty structure of the same size and properties
+                            return (
+                                <React.Fragment key={match.participant1 + match.participant2}>
 
-                );
-
-                added_rows = columns[stageIndex].props.children.length;
-                    
+                                    { stageIndex !== last_stage_index && (
+                                    <tr className="">
+                                        <td className="border-0 empty-td">&nbsp;</td>
+                                    </tr>
+                                    )}
+                                    <tr className="">
+                                        <td className="border-0 empty-td">&nbsp;</td>
+                                    </tr>
+                                    <tr className="">
+                                        <td className="border-0 empty-td">&nbsp;</td>
+                                    </tr>
+                                    <tr className="">
+                                        <td className="border-0 empty-td">&nbsp;</td>
+                                    </tr>
+                                </React.Fragment>
+                            );
+                        }
+                    })}
+                </td>
+            );
+        
+            added_rows = columns[stageIndex].props.children.length;
+        
             // Add another column with empty cells to fill the space between stages
             if (stageIndex !== stages.length - 1) {
                 columns.push(
@@ -427,61 +460,54 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                     </td>
                 );
             }
-
-      
-                
-            }
-
-            );
+        });
         
-            return (
-                <table className="">
-                    <tbody>
-                        <tr className="">
-                            {columns}
-                        </tr>
-                    </tbody>
-                </table>
-            );
+    
+        return (
+            <table className="">
+                <tbody>
+                    <tr className="">
+                        {columns}
+                    </tr>
+                </tbody>
+            </table>
+        );
     };
 
     return (
-       <div className="modal fade" id="ladderModal" tabIndex="-1" role="dialog" aria-labelledby="ladderModalLabel" aria-hidden="true">
-    <div className="modal-dialog modal-xl modal-dialog-scrollable" role="document" style={{maxWidth: "50%", overflow: "auto"}}>
-        <div className="modal-content">
-            <div className="modal-header">
-                <h2>Ladder Management</h2>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onClose}>
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div className="modal-body">
-                {loading && <p>Loading...</p>}
-                {!loading && ladderInit && (
-                    <div>
-                        <table className="table">
-                            <tbody>
-                                { !loading ? (
-                                    generateLadderTable()
-                                ) : (<div></div>)}
-                            </tbody>
-                        </table>
+        <div className="modal fade" id="ladderModal" tabIndex="-1" role="dialog" aria-labelledby="ladderModalLabel" aria-hidden="true">
+            <div className="modal-dialog modal-ladder modal-dialog-scrollable" role="document" style={{maxWidth: "50%", overflow: "auto"}}>
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h2>Tournament Ladder</h2>
+                        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onClose}>
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                )}
-                {!loading && !ladderInit && (
-                    <div>
-                        <p>No ladder available.</p>
+                    <div className="modal-body">
+                        {loading && <p>Loading...</p>}
+                        {!loading && ladderInit && (
+                            <div>
+                                <table className="table ladder-table">
+                                    <tbody>
+                                        { !loading ? (
+                                            generateLadderTable()
+                                        ) : (<div></div>)}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                        {!loading && !ladderInit && (
+                            <div>
+                                <p>No ladder available.</p>
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
+            <Popup title={popupTitle} message={popupMessage} onClose={() => setShowPopup(false)} show={showPopup} />
         </div>
-    </div>
-    <Popup title={popupTitle} message={popupMessage} onClose={() => setShowPopup(false)} show={showPopup} />
-</div>
-
     );
-    
-
 };
 
 export default LadderModal;

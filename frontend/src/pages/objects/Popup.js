@@ -22,4 +22,4 @@ const Popup = ({ title, message, show, onClose }) => {
     );
 };
 
-export default Popup;
+export { Popup as Popup, Popup as SystemPopup, Popup as default };

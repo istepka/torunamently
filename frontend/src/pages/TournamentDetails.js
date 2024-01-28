@@ -4,12 +4,16 @@ import { useParams } from 'react-router-dom';
 import Header from './Header';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
-
+import { MapContainer, TileLayer, Marker, Popup  } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import EditTournamentModal from './objects/EditTorunamentModal';
 import TournamentSignUpModal from './objects/TournamentSignUpModal';
-import Popup from './objects/Popup';
+import { SystemPopup } from './objects/Popup';
 import LadderModal from './objects/LadderModal';
+import './styles/TournamentDetails.css';
+
+
 
 const TournamentDetails = () => {
     // Use the useParams hook to get the id from the URL
@@ -229,14 +233,15 @@ const TournamentDetails = () => {
             <div className='mt-3 mb-3'>
                 <hr/>
                 <h1 className="mb-4 text-center">Sponsors</h1>
-                <div className="row mt-3 mb-3">
+                <div className="row mt-3 mb-3 ">
                     {sponsors.map((sponsor, index) => (
-                        <div className="col-sm-4" key={sponsor.name}>
-                            <div className="card">
+                        <div className="col-sm-4 mr-2 mt-2 sponsor-card" key={sponsor.name}>
+                            <div className=" sponsor-div" >
                                 <div className="card-body">
                                     <h5 className="card-title">{sponsor.name}</h5>
-                                    <a href={'https://' + sponsor.website} className="btn btn-primary mb-2">Go to website</a>
-                                    <img src={sponsor.logo} className="card-img-top" alt=""/>
+                                    <a href={'https://' + sponsor.website} className="btn mb-2">
+                                        <img src={sponsor.logo} className="card-img-top mb-2" alt="..."/>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -245,6 +250,7 @@ const TournamentDetails = () => {
             </div>
         );
     }
+    
 
     function formatDate(date) {
         const dateObj = new Date(date);
@@ -259,28 +265,59 @@ const TournamentDetails = () => {
     }
 
     function renderTournamentDetails() {
+
+        var geo_coordinates_parsed = tournament.geo_coordinates ? tournament.geo_coordinates.split(',') : null;
+        console.log('geo_coordinates_parsed: ', geo_coordinates_parsed);
+        // check if geo_coordinates_parsed is valid
+        const isGeoCoordinatesValid = geo_coordinates_parsed 
+                                        && geo_coordinates_parsed.length === 2 
+                                        && !isNaN(geo_coordinates_parsed[0]) 
+                                        && !isNaN(geo_coordinates_parsed[1]);
+
+        console.log('isGeoCoordinatesValid: ', isGeoCoordinatesValid);
+
+        // to float
+        if (isGeoCoordinatesValid){
+            geo_coordinates_parsed = geo_coordinates_parsed.map(parseFloat);  
+        }
+
+        const position = isGeoCoordinatesValid ? [geo_coordinates_parsed[0], geo_coordinates_parsed[1]] : [0, 0];
+        console.log('position: ', position);
         return (
-            <div className="d-flex flex-column align-items-center">
-            <h1 className="mb-4">{tournament.name}</h1>
-            <div className="d-flex flex-column">
-                <p className="mb-2"><strong>Discipline:</strong> {tournament.discipline}</p>
-                <p className="mb-2"><strong>Time:</strong> {formatDate(tournament.time)}</p>
-                <p className="mb-2"><strong>Location:</strong> {tournament.location}</p>
-                
-                {/* Add a container div with a fixed height and overflow-y: auto */}
-                <strong>Participants:</strong>
-                <div className="participants-list-container mb-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
-                <ol className="list-unstyled mb-0">
-                    {participants.map((participant, index) => (
-                    <li key={index}>{participant}</li>
-                    ))}
-                </ol>
+            <div className='tournament-details-container'>
+                <div className="tournament-details">
+                    <h1 className="mb-4">{tournament.name}</h1>
+                    <p className="mb-2"><strong>Discipline:</strong> {tournament.discipline}</p>
+                    <p className="mb-2"><strong>Time:</strong> {formatDate(tournament.time)}</p>
+                    <p className="mb-2"><strong>Location:</strong> {tournament.location}</p>
+                    <p className="mb-2"><strong>Geo Location:</strong> {tournament.geo_coordinates}</p>
+                    <p className="mb-2"><strong>Participants limit:</strong> { participants.length } / {tournament.max_participants}</p>
+                    <p className="mb-2"><strong>Application Deadline:</strong> {formatDate(tournament.app_deadline)}</p>
+                    <p className="mb-2"><strong>Creator:</strong> {tournament.creator}</p>
                 </div>
 
-                <p className="mb-2"><strong>Participants limit:</strong> { participants.length } / {tournament.max_participants}</p>
-                <p className="mb-2"><strong>Application Deadline:</strong> {formatDate(tournament.app_deadline)}</p>
-                <p className="mb-2"><strong>Creator:</strong> {tournament.creator}</p>
-            </div>
+                <div className='map-container'>
+                    <h2 className="mb-3 text-center">Map</h2>
+                        <MapContainer center={position} zoom={5} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+                            <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            <Marker position={position}>
+                            <Popup>
+                                Tournament Location <br /> {tournament.location}
+                            </Popup>
+                            </Marker>
+                        </MapContainer>
+                </div>
+                <div className='participants-list'>
+                    <h2>Participants</h2>
+                    <ol className="list-unstyled mb-0">
+                        {participants.map((participant, index) => (
+                        <li key={index}>{participant}</li>
+                        ))}
+                    </ol>
+                </div>
             </div>
 
         );
@@ -324,7 +361,7 @@ const TournamentDetails = () => {
                 </div>
                 <EditTournamentModal onClose={toggleEditTorunamentModal} tournamentId={id} />
                 <TournamentSignUpModal onClose={() => setShowSignUpModal(false)} onSignUp={handleSignUp} />
-                <Popup title={popupTitle} message={popupMessage} show={showPopup} onClose={() => setShowPopup(false)} />
+                <SystemPopup title={popupTitle} message={popupMessage} show={showPopup} onClose={() => setShowPopup(false)} />
                 <LadderModal participants={participants} onClose={() => setShowLadderModal(false)} tournament_id={id} />
 
             </div>
@@ -346,7 +383,7 @@ const TournamentDetails = () => {
                 </div>
                 <EditTournamentModal onClose={toggleEditTorunamentModal} tournamentId={id} />
                 <TournamentSignUpModal onClose={() => setShowSignUpModal(false)} onSignUp={handleSignUp} />
-                <Popup title={popupTitle} message={popupMessage} show={showPopup} onClose={() => setShowPopup(false)} />
+                <SystemPopup title={popupTitle} message={popupMessage} show={showPopup} onClose={() => setShowPopup(false)} />
                 <LadderModal participants={participants} onClose={() => setShowLadderModal(false)} tournament_id={id} />
 
             </div>

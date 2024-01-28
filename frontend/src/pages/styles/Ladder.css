@@ -6,16 +6,28 @@
     width: 150px;
 }
 
-/* .modal-ladder {
+.modal-ladder {
     max-width: 90vw;
     max-height: 90vh;
     min-width: 85vw;
-} */
+}
 
-td {
+.ladder-table td{
     min-width: 300px;
 }
 
-.empty-td {
+.empty-td td{
     min-width: 74px;
+    max-width: 74px;
 }
+
+.map-style {
+    width: 15vw;
+    height: 30vh;
+}
+
+/* .leaflet-container {  
+    width: 100%;  
+    height: 100vh;  
+    z-index: 1;
+} */
