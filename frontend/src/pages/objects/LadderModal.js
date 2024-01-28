@@ -257,7 +257,7 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                         {stage.map((match) => (
                             <React.Fragment key={match.participant1 + match.participant2}>
                                 <tr className="text-left">
-                                    <td className="font-weight-bold border-3 border-bottom-0 border-top-3 ">[0] {match.participant1}</td>
+                                    <td className="font-weight-bold border-3 border-bottom-0 border-top-3 border-dark">[0] {match.participant1}</td>
                                 </tr>
                                 <tr className="text-left">
                                     <td className="font-weight-bold border-3 border-top-0">[1] {match.participant2}</td>
@@ -268,7 +268,7 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                                             <div className="col-12 mb-2 d-flex justify-content-between align-items-center">
                                                 <form className="form-inline w-100 ">
                                                     <label className="w-100 text-center col-6 mb-1">Winner</label>
-                                                    <select id={`select-${match.participant1}-${match.participant2}`} className="form-control w-100 text-center col-3 ml-2" 
+                                                    <select id={`select-${match.participant1}-${match.participant2}`} className="form-control w-100 text-center col-4 ml-2" 
                                                         disabled={match.verified || !match.editableByUser} 
                                                         defaultValue={ match.verified ? match.score1 : null }
                                                         onChange={(event) => onChangeForMatchupScore(event, match.participant1, match.participant2)}>
@@ -299,14 +299,20 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
             // Add another column with empty cells to fill the space between stages
             if (stageIndex !== stages.length - 1) {
                 columns.push(
-                    <td key={"empty-" + stageIndex.toString()} className="p-0">
+                    <td key={"empty-" + stageIndex.toString()} className="empty-col">
                         {Array.from({ length: added_rows }).map((_, index) => (
                             <React.Fragment key={"empty-" + stageIndex.toString() + "-" + index.toString()}>
-                                <tr className="text-center col-12">
-                                    <td className="">&nbsp;</td>
+                                <tr className="">
+                                    <td className="border-0">&nbsp;</td>
                                 </tr>
-                                <tr className="text-center">
-                                    <td className="">&nbsp;</td>
+                                <tr className="">
+                                    <td className="border-0">&nbsp;</td>
+                                </tr>
+                                <tr className="">
+                                    <td className="border-0">&nbsp;</td>
+                                </tr>
+                                <tr className="">
+                                    <td className="border-0">&nbsp;</td>
                                 </tr>
                             </React.Fragment>
                         ))}
@@ -321,9 +327,9 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
             );
         
             return (
-                <table className="table">
+                <table className="">
                     <tbody>
-                        <tr>
+                        <tr className="">
                             {columns}
                         </tr>
                     </tbody>
@@ -333,7 +339,7 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
 
     return (
        <div className="modal fade" id="ladderModal" tabIndex="-1" role="dialog" aria-labelledby="ladderModalLabel" aria-hidden="true">
-    <div className="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+    <div className="modal-dialog modal-xl modal-dialog-scrollable" role="document" style={{maxWidth: "50%", overflow: "auto"}}>
         <div className="modal-content">
             <div className="modal-header">
                 <h2>Ladder Management</h2>

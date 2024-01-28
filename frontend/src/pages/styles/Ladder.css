@@ -1,3 +1,17 @@
 .fixed-width-column {
     width: 400px; /* Adjust the width as needed */
 }
+
+.empty-col {
+    width: 150px;
+}
+
+.modal-ladder {
+    max-width: 90vw;
+    max-height: 90vh;
+    min-width: 85vw;
+}
+
+td {
+    min-width: 300px;
+}
