@@ -109,7 +109,15 @@ app.get("/verify_account", async (req, res) => {
         // Call verifyAccount function to verify the account
         const result = await verifyAccount(email, token);
 
-        res.send(result);
+        // Return simple html page
+        
+        if (result) {
+            res.send("<h1>Account verified successfully!</h1><p>You can now safely close this tab and log in to Tournamently!</p>");
+        }
+        else {
+            res.send("<h1>Account verification failed!</h1>");
+        }
+
     } catch (error) {
         console.error('Error during account verification:', error);
         res.status(500).send("Internal Server Error");

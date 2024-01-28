@@ -57,14 +57,20 @@ INSERT INTO tournamently.TOURNAMENT_PARTICIPANTS (tournament_id, participant) VA
 (1, 'hoopstar@example.com'),
 (1, 'soccer_fanatic@example.com'),
 (1, 'archery_expert@example.com'),
-(1, 'wrestling_star@example.com'),
+(1, 'tennis_champion@example.com'),
+(1, 'fencing_maestro@example.com'),
+(1, 'golf_pro@example.com'),
+(1, 'rugby_warrior@example.com'),
+
 (2, 'chess_master@example.com'),
 (2, 'surfing_pro@example.com'),
 (2, 'golf_enthusiast@example.com'),
 (2, 'volley_pro@example.com'),
+
 (3, 'track_and_field@example.com'),
 (3, 'snooker_pro@example.com'),
 (3, 'martial_artist@example.com'),
+
 (4, 'cycle_enthusiast@example.com'),
 (4, 'swim_master@example.com'),
 (4, 'equestrian_lover@example.com');
@@ -74,33 +80,32 @@ INSERT INTO tournamently.SPONSORS (name, logo, website) VALUES
 ('Coca cola', 'https://i.ytimg.com/vi/UDYCc4dbSJU/maxresdefault.jpg', 'www.coke.com'),
 ('SEJM RP', 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Sejm_RP_logo_and_wordmark.svg/1200px-Sejm_RP_logo_and_wordmark.svg.png', 'www.sejm.gov.pl'),
 ('Sprite', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Sprite_2022.svg/640px-Sprite_2022.svg.png', 'www.sprite.com'),
-('Tiktok', 'https://sf-static.tiktokcdn.com/obj/eden-sg/uhtyvueh7nulogpoguhm/tiktok-icon2.png', 'www.tiktok.com');
+('Tiktok', 'https://sf-static.tiktokcdn.com/obj/eden-sg/uhtyvueh7nulogpoguhm/tiktok-icon2.png', 'www.tiktok.com'),
+('Politechnika Poznańska', 'https://informator.put.poznan.pl/scripts/build/3c76a04891137e2ee206f95827b93766.svg', 'www.put.poznan.pl'),
+('OpenAI', 'https://obs.line-scdn.net/0heetH6pzYOkpJMSjIRldFHXFnNjt6VyBDawclKjxkYHtjHSkVJV5pKWhjbWY0VX4ZaV8iL2VlYX03Vi0cIg/w644', 'www.openai.com'),
+('Carnegie Mellon University', 'https://www.cmu.edu/brand/brand-guidelines/images/seal-4c-600x600-min.jpg', 'www.cmu.edu');
 
 INSERT INTO tournamently.TOURNAMENT_SPONSORS (tournament_id, sponsor_name) VALUES
 (1, 'Sprite'),
 (1, 'Coca cola'),
+(1, 'Politechnika Poznańska'),
+(2, 'OpenAI'),
+(2, 'Carnegie Mellon University'),
 (2, 'SEJM RP'),
 (2, 'Tiktok'),
 (3, 'Tiktok'),
 (3, 'Coca cola'),
+(3, 'SEJM RP'),
+(4, 'Coca cola'),
+(4, 'Politechnika Poznańska'),
 (4, 'Sprite');
 
 
 INSERT INTO tournamently.TOURNAMENT_RESULTS (tournament_id, participant1, participant2, score1, score2, verified) VALUES
-(1, 'hoopstar@example.com', 'ignacy.stepka@gmail.com', 1, 0, false),
-(1, 'archery_expert@example.com', 'equestrian_lover@example.com', 1, 1, true),
-(1, 'soccer_fanatic@example.com', 'user2@example.com', 0, 0, true),
-(1, 'user3@example.com', 'wrestling_star@example.com', 1, 0, false),
+(1, 'hoopstar@example.com', 'soccer_fanatic@example.com', 1, 1, true),
+(1, 'archery_expert@example.com', 'tennis_champion@example.com', 0, 0, true),
+(1, 'fencing_maestro@example.com', 'golf_pro@example.com', 1, 0, false),
 
-(2, 'chess_master@example.com', 'surfing_pro@example.com', 3, 1, true),
-(2, 'golf_enthusiast@example.com', 'volley_pro@example.com', 2, 2, true),
-(2, 'surfing_pro@example.com', 'golf_enthusiast@example.com', 1, 3, true),
-(2, 'chess_master@example.com', 'volley_pro@example.com', 3, 2, true),
-
-(3, 'track_and_field@example.com', 'snooker_pro@example.com', 2, 2, true),
-(3, 'martial_artist@example.com', 'track_and_field@example.com', 3, 1, true),
-(3, 'snooker_pro@example.com', 'martial_artist@example.com', 0, 2, true),
-
-(4, 'cycle_enthusiast@example.com', 'swim_master@example.com', 1, 3, true),
-(4, 'equestrian_lover@example.com', 'cycle_enthusiast@example.com', 2, 2, true),
-(4, 'swim_master@example.com', 'equestrian_lover@example.com', 3, 0, true);
+(2, 'chess_master@example.com', 'surfing_pro@example.com', 1, 1, true),
+(2, 'golf_enthusiast@example.com', 'volley_pro@example.com', 1, 1, true),
+(2, 'surfing_pro@example.com', 'volley_pro@example.com', 1, 1, true);

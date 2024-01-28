@@ -206,18 +206,32 @@ const TournamentDetails = () => {
                     setShowSignUpModal(false);
 
                     // show popup
-                    setPopupMessage(res.data.message);
-                    setPopupTitle('Success');
-                    setShowPopup(true);
+                    showPopupMessage("Success", res.data.message);
+
+                    // refresh page
+                    window.location.reload();
+
                 } else {
                     // show popup
-                    setPopupMessage(res.data.message);
-                    setPopupTitle('Error');
-                    setShowPopup(true);
+                    showPopupMessage("Error", res.data.message);
+
+                    // close modal in 2 seconds
+                    setTimeout(() => {
+                        setShowSignUpModal(false);
+                    }, 2000);
+
                 }
             })
             .catch(err => {
                 console.log(err);
+
+                // show popup
+                showPopupMessage("Error", err.message);
+
+                // close modal in 2 seconds
+                setTimeout(() => {
+                    setShowSignUpModal(false);
+                }, 2000);
             })
     }
 

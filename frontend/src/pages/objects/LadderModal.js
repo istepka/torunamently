@@ -17,10 +17,20 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
     const [popupTitle, setPopupTitle] = useState(''); 
     const [showPopup, setShowPopup] = useState(false);
 
+    const supported_lengths = [2, 4, 8, 16, 32, 64];
+
 
     useEffect(() => {
         const fetchLadder = async () => {
             setLoading(true);
+
+            // Check if the number of participants is supported
+            if (participants.length === 0 || !supported_lengths.includes(participants.length)) {
+                setLoading(false);
+                console.log('Unsupported number of participants:', participants.length);
+                return;
+            }
+
             try {
                 const token = localStorage.getItem('token');
                 const response = await axios.get('http://localhost:8801/fetch_ladder', { params: { token, tournament_id } });
@@ -63,7 +73,6 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
         setPopupMessage(message);
         setShowPopup(true);
     }
-
 
     function checkMatchupScore(participant1, participant2) {
         // Check if there is a score for this matchup
@@ -201,7 +210,7 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                 (matchup.participant1 === participant2 && matchup.participant2 === participant1);
         });
 
-        // If there matchup is not verified and the current user is a participant, return true
+        // If the matchup is not verified and the current user is a participant, return true
         const currentUser = localStorage.getItem('email');
         if (matchup && !matchup.verified && (matchup.participant1 === currentUser || matchup.participant2 === currentUser)) {
             return true;
@@ -240,7 +249,7 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
     const generateLadderTable = () => {
         if (!ladderInit || ladderInit.length === 0) return null;
 
-        const supported_lengths = [2, 4, 8, 16, 32, 64, 128];
+        
         if (!supported_lengths.includes(participants.length)) {
             return (
                 <div className='alert alert-danger' role='alert'>
@@ -263,14 +272,17 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
             var stage = [];
             for (let i = 0; i < participants_in_current_stage_cnt; i += 2) {
                 if (stages.length === 0) {
-                    const pair1 = ladderInit[i];
-                    const pair2 = ladderInit[i + 1];
+                    const pair1 = ladderInit.find((pair) => pair.idx === i);
+                    const pair2 = ladderInit.find((pair) => pair.idx === i + 1);
 
-                    console.log('Pair1:', pair1, 'Pair2:', pair2);
-
-
+                    
+                    
                     const matchup_score = checkMatchupScore(pair1.participant, pair2.participant);
 
+                    if (!matchup_score) {
+                        checkOrAddMatchup(pair1.participant, pair2.participant);
+                    }
+                    
                     
                     const match = {
                         participant1: pair1.participant,
@@ -280,7 +292,8 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                         verified: matchup_score ? matchup_score[2] : false,
                         editableByUser: notVerifiedAndEditable(pair1.participant, pair2.participant),
                     };
-
+                    
+                    console.log('Match:', match);
                     stage.push(match);
                 }
                 else {

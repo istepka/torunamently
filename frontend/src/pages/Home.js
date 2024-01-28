@@ -111,10 +111,6 @@ const Home = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-
-
-
-
     function checkIfUserSignedUpToTourny(tournamentId) {
         for (let i = 0; i < sigedUpToTournys.length; i++) {
             if (sigedUpToTournys[i] === tournamentId) {

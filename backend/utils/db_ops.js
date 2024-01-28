@@ -483,13 +483,49 @@ async function getLadder(tournamentId) {
         // ie assign each participant an index
         if (ladder.length === 0) {
             const participants = await getTournamentParticipants(tournamentId);
-            for (const [idx, participant] of participants.entries()) {
+            const currentResults = await getResultsForTournament(tournamentId);
+            console.log('Participants:', participants);
+            // Create ladder
+            const pairedUpParticipants = [];
+            const unpairedParticipants = [];
+
+            // Pair up participants based on current results
+            // Paired up participants must be next to each other in the ladder
+
+            for (const participant of participants) {
+
+                if (pairedUpParticipants.includes(participant)) {
+                    continue;
+                }
+                
+                const pairedParticipantResult = currentResults.find(result => result.participant1 === participant || result.participant2 === participant);
+
+                if (pairedParticipantResult) {
+                    pairedUpParticipants.push(pairedParticipantResult.participant1);
+                    pairedUpParticipants.push(pairedParticipantResult.participant2);
+                } else {
+                    unpairedParticipants.push(participant);
+                }
+
+
+            }
+
+            // Add unpaired participants to the end of the list
+            for (const participant of unpairedParticipants) {
+                pairedUpParticipants.push(participant);
+            }
+
+            console.log('Paired up participants:', pairedUpParticipants);
+
+            // Create ladder
+            for (let i = 0; i < pairedUpParticipants.length; i++) {
                 await Ladder.create({
                     tournament_id: tournamentId,
-                    participant,
-                    idx,
+                    participant: pairedUpParticipants[i],
+                    idx: i,
                 }, { fields: ['tournament_id', 'participant', 'idx'] });
             }
+
         }
 
         // Return ladder
@@ -514,7 +550,7 @@ async function getResultsForTournament(tournamentId) {
                 tournament_id: tournamentId,
             }, attributes: ['participant1', 'participant2', 'score1', 'score2', 'verified'],
         });
-        console.log('Results:', results);
+        // console.log('Results:', results);
         return results;
     } catch (error) {
         throw new Error(`Error fetching tournament results: ${error.message}`);
