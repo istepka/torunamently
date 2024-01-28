@@ -87,10 +87,10 @@ INSERT INTO tournamently.TOURNAMENT_SPONSORS (tournament_id, sponsor_name) VALUE
 
 
 INSERT INTO tournamently.TOURNAMENT_RESULTS (tournament_id, participant1, participant2, score1, score2, verified) VALUES
-(1, 'hoopstar@example.com', 'soccer_fanatic@example.com', 2, 1, true),
-(1, 'archery_expert@example.com', 'wrestling_star@example.com', 3, 2, true),
-(1, 'soccer_fanatic@example.com', 'archery_expert@example.com', 1, 0, true),
-(1, 'hoopstar@example.com', 'wrestling_star@example.com', 2, 3, true),
+(1, 'hoopstar@example.com', 'ignacy.stepka@gmail.com', 1, 0, false),
+(1, 'archery_expert@example.com', 'equestrian_lover@example.com', 1, 1, true),
+(1, 'soccer_fanatic@example.com', 'user2@example.com', 0, 0, true),
+(1, 'user3@example.com', 'wrestling_star@example.com', 1, 0, false),
 
 (2, 'chess_master@example.com', 'surfing_pro@example.com', 3, 1, true),
 (2, 'golf_enthusiast@example.com', 'volley_pro@example.com', 2, 2, true),
