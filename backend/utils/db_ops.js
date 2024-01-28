@@ -19,6 +19,58 @@ async function createUser(email, password, verified = false, verificationToken =
     }
 }
 
+async function getUserByEmail(email) {
+    try {
+        const user = await Users.findOne({
+            where: { email: email },
+        });
+        return user;
+    } catch (error) {
+        throw new Error(`Error fetching user by email: ${error.message}`);
+    }
+}
+
+async function resetPassword(email, newPasswordHashed) {
+    try {
+        const user = await Users.findOne({
+            where: { email: email },
+        });
+
+        if (user) {
+            // Email exists
+            await user.update({ password: newPasswordHashed });
+            return { status: "success", message: "Password reset successfully!" };
+        }
+        else {
+            return { status: "error", message: "Email does not exist!" };
+        }
+
+    } catch (error) {
+        throw new Error(`Error resetting password: ${error.message}`);
+    }
+}
+
+async function updateVerificationToken(email, verificationToken) {
+    try {
+        const user = await Users.findOne({
+            where: { email: email },
+        });
+
+        if (user) {
+            // Email exists
+            await user.update({ verification_token: verificationToken });
+            return { status: "success", message: "Verification token updated successfully!" };
+        }
+        else {
+            return { status: "error", message: "Email does not exist!" };
+        }
+
+    } catch (error) {
+        throw new Error(`Error updating verification token: ${error.message}`);
+    }
+}
+
+
 // Function to add a participant to a tournament
 async function addParticipantToTournament(tournamentId, participantEmail) {
     try {
@@ -532,4 +584,7 @@ export {
     getResultsForTournament,
     updateMatchupScore,
     addMatchup,
+    getUserByEmail,
+    resetPassword,
+    updateVerificationToken,
 };

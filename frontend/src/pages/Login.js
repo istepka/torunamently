@@ -80,12 +80,12 @@ const Login = () => {
             <div className="container">
                 
 
-                <div className="row justify-content-center">
+                <div className="row justify-content-center" style={{ gridArea: "main" }}>
                     <div className="col-md-6">
-                        <h1 className="mt-5 mb-4">{action === "login" ? "Login" : "Sign Up"} to Tournamently</h1>
+                        <h1 className="mt-5 mb-4 text-center">{action === "login" ? "Log in" : "Sign Up"} to Tournamently</h1>
                         <form id="login-form" onSubmit={handleSubmit}>
                             <div className="mb-3">
-                                <label htmlFor="email" className="form-label">email</label>
+                                <label htmlFor="email" className="form-label">Email</label>
                                 <input
                                     type="text"
                                     className="form-control"
@@ -109,11 +109,18 @@ const Login = () => {
                                 />
                             </div>
                             <button type="submit" className="btn btn-primary">{action === "login" ? "Login" : "Sign Up"}</button>
+
+                            {action === "login" && (
+                                <a href="/forgot_password" className="btn btn-link">Forgot password?</a>
+                            )}
+
                         </form>
 
-                        <button className="btn btn-link" onClick={() => setAction(action === "login" ? "sign_up" : "login")}>
-                            {action ? "Don't have an account? Sign up here." : "Already have an account? Login here."}
+                        <button className="btn btn-secondary mt-2" onClick={() => setAction(action === "login" ? "sign_up" : "login")}>
+                            {action === "login" ? "Don't have an account? Sign up here." : "Already have an account? Login here."}
                         </button>
+
+
 
                         <Popup title={popupTitle} message={popupMessage} show={showPopup} onClose={closePopup} />
                     </div>

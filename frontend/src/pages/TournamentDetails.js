@@ -47,7 +47,7 @@ const TournamentDetails = () => {
                 const response = await fetch(`http://localhost:8801/get_tournament_details?id=${id}&token=${token}`);
                 const jsonData = await response.json();
                 if (jsonData.status === "error") {
-                    alert(jsonData.message);
+                    showPopupMessage(jsonData.message);
                     setProblem(jsonData.message);
                     return;
                 }
@@ -66,7 +66,7 @@ const TournamentDetails = () => {
                 const jsonData = await response.json();
                 
                 if (jsonData.status === "error") {
-                    alert(jsonData.message);
+                    showPopupMessage(jsonData.message);
                     setProblem(jsonData.message);
                     return;
                 }
@@ -85,7 +85,7 @@ const TournamentDetails = () => {
                 const jsonData = await response.json();
 
                 if (jsonData.status === "error") {
-                    alert(jsonData.message);
+                    showPopupMessage(jsonData.message);
                     setProblem(jsonData.message);
                     return;
                 }
@@ -180,6 +180,11 @@ const TournamentDetails = () => {
         fetchData();
     }, [id, setTournament, setSponsors, setIsSignedUp, setShowEditModal]);
     
+    function showPopupMessage(title, message) {
+        setPopupTitle(title);
+        setPopupMessage(message);
+        setShowPopup(true);
+    }
 
     const handleSignUp = ({ licenseNumber, currentRanking }) => {
         const token = localStorage.getItem("token");
@@ -256,7 +261,6 @@ const TournamentDetails = () => {
             </div>
         );
     }
-    
 
     function formatDate(date) {
         const dateObj = new Date(date);
@@ -365,7 +369,7 @@ const TournamentDetails = () => {
         return (
             <div>
                 <Header />
-                <div className="container mt-3 mb-3">
+                <div className="container container-t mt-3 mb-3">
                     {renderTournamentDetails()}
                     <div className="d-flex justify-content-center mt-5 mb-5 tournament-details-buttons">
                         {renderSignUpButton(false)}
@@ -388,15 +392,13 @@ const TournamentDetails = () => {
             <div>
                 <Header />
                 <div className="container container-t mt-3 mb-3 ">
-                        <div>
-                            {renderTournamentDetails()}
-                            <div className="tournament-details-buttons mt-2 mb-2">
-                                {renderSignUpButton(true)}
-                                {renderEditButton(isCreator)}
-                                {renderLadderButton()}
-                            </div>
-                            { sponsors.length > 0 && renderSponsors() }
+                        {renderTournamentDetails()}
+                        <div className="d-flex justify-content-center mt-5 mb-5 tournament-details-buttons">
+                            {renderSignUpButton(true)}
+                            {renderEditButton(isCreator)}
+                            {renderLadderButton()}
                         </div>
+                        { sponsors.length > 0 && renderSponsors() }
                 </div>
                 <EditTournamentModal onClose={toggleEditTorunamentModal} tournamentId={id} />
                 <TournamentSignUpModal onClose={() => setShowSignUpModal(false)} onSignUp={handleSignUp} />

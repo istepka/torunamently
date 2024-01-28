@@ -257,12 +257,16 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
         var participants_in_current_stage_cnt = participants.length;
         var participants_in_next_stage_cnt = 0;
 
+        console.log('Initial size:', initial_size)
+
         while (participants_in_current_stage_cnt > 1) {
             var stage = [];
             for (let i = 0; i < participants_in_current_stage_cnt; i += 2) {
                 if (stages.length === 0) {
                     const pair1 = ladderInit[i];
                     const pair2 = ladderInit[i + 1];
+
+                    console.log('Pair1:', pair1, 'Pair2:', pair2);
 
 
                     const matchup_score = checkMatchupScore(pair1.participant, pair2.participant);

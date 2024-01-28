@@ -8,6 +8,8 @@ import Ladder from './pages/Ladder';
 import TournamentDetails from './pages/TournamentDetails';
 import Login from './pages/Login';
 import Account from './pages/Account';
+import ForgotPass from './pages/ForgotPass';
+import ResetPass from './pages/ResetPass';
 
 const server = "http://localhost:8801";
 
@@ -23,6 +25,8 @@ function App() {
 
           <Route path="/login" element={<Login />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/forgot_password" element={<ForgotPass />} />
+          <Route path="/reset_password" element={<ResetPass />} />
         </Routes>      
       </BrowserRouter>
 

@@ -15,7 +15,10 @@ import {
     isUserTournamentCreator, signUpUserToTournament,
     getTournamentParticipants, updateTournament,
     getLadder, getResultsForTournament, 
-    updateMatchupScore, addMatchup
+    updateMatchupScore, addMatchup,
+    getUserByEmail,
+    resetPassword,
+    updateVerificationToken,
 } from "./utils/db_ops.js";
 
 const app = express()
@@ -129,6 +132,89 @@ app.get("/verify_token", async (req, res) => {
         });
     } catch (error) {
         console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+app.post("/forgot_password", async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        // Check if user exists
+        const user = await getUserByEmail(email);
+        if (user === null) {
+            res.send({ "status": "success", "message": "If the email exists, you will receive an email with a link to reset your password!", "data": {} });
+            return;
+        }
+
+        // Send password reset email
+        const transporter = nodemailer.createTransport({
+            host: "smtp.wp.pl",
+            port: 465,
+            secure: true,
+            auth: {
+                user: emailCredentials.email,
+                pass: emailCredentials.password,
+            },
+        });
+
+        const token = getRandomValues(new Uint8Array(16)).join("");
+
+        // Update user with password reset token
+        const updateRes  = await user.update({ verification_token: token });
+
+        if (!updateRes) {
+            res.send({ "status": "error", "message": "Database error", "data": {} });
+            return;
+        }
+
+        const mailOptions = {
+            from: emailCredentials.email,
+            to: email,
+            subject: 'Tournamently Password Reset',
+            text: 'Click the link below to reset your password:\nhttp://localhost:3000/reset_password?email=' + email + '&token=' + token
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        const message = "If the email exists, you will receive an email with a link to reset your password!";
+        res.send({ "status": "success", "message": message, "data": {} });
+    } catch (error) {
+        console.error('Error during password reset:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+app.post("/reset_password", async (req, res) => {
+    const { email, token, password } = req.body;
+
+    try {
+        // Check if user exists
+        const user = await getUserByEmail(email);
+        if (user === null) {
+            res.send({ "status": "error", "message": "Invalid email", "data": {} });
+            return;
+        }
+
+        // Check if token is valid
+        if (user.verification_token !== token) {
+            res.send({ "status": "error", "message": "Invalid token", "data": {} });
+            return;
+        }
+
+        // Update user password
+        const hashedPassword = await hashPassword(password);
+       
+        const updateRes = await resetPassword(email, hashedPassword);
+        if (!updateRes) {
+            res.send({ "status": "error", "message": "Database error", "data": {} });
+            return;
+        }
+
+        const message = "Password reset successfully!";
+        res.send({ "status": "success", "message": message, "data": {} });
+    } catch (error) {
+        console.error('Error during password reset:', error);
         res.status(500).send("Internal Server Error");
     }
 });
