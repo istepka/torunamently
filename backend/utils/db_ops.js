@@ -612,6 +612,56 @@ async function checkIfLadderExists(tournamentId) {
     }
 }
 
+async function getListOfTournamentsUserCreated(email) {
+    try {
+        const tournaments = await Tournaments.findAll({
+            where: {
+                creator: email,
+            },
+        });
+
+        if (tournaments.length === 0) {
+            return [];
+        }
+
+        const tournamentDetails = await Tournaments.findAll({
+            where: {
+                id: tournaments.map(tournament => tournament.id),
+            },
+        });
+
+        return tournamentDetails;
+    } catch (error) {
+        throw new Error(`Error fetching tournaments user created: ${error.message}`);
+    }
+}
+
+async function getFullListOfTournamentsUserIsSignedUpTo(email) {
+    try {
+        const tournaments = await TournamentParticipants.findAll({
+            where: {
+                participant: email,
+            },
+            attributes: ['tournament_id'],
+        });
+
+        if (tournaments.length === 0) {
+            return [];
+        }
+
+        // Get tournament details
+        const tournamentDetails = await Tournaments.findAll({
+            where: {
+                id: tournaments.map(tournament => tournament.tournament_id),
+            },
+        });
+
+        return tournamentDetails;
+    } catch (error) {
+        throw new Error(`Error fetching tournaments user is signed up to: ${error.message}`);
+    }
+}
+
 
 export { 
     createUser, 
@@ -641,4 +691,6 @@ export {
     resetPassword,
     updateVerificationToken,
     checkIfLadderExists,
+    getListOfTournamentsUserCreated,
+    getFullListOfTournamentsUserIsSignedUpTo
 };

@@ -335,7 +335,10 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                         score1: matchup_score ? matchup_score[0] : null,
                         score2: matchup_score ? matchup_score[1] : null,
                         verified: matchup_score ? matchup_score[2] : false,
-                        editableByUser: notVerifiedAndEditable(pair1.participant, pair2.participant),
+                        editableByUser: matchup_score 
+                                        ? notVerifiedAndEditable(pair1.participant, pair2.participant) 
+                                        : localStorage.getItem('email') === pair1.participant 
+                                            || localStorage.getItem('email') === pair2.participant,
                     };
                     
                     console.log('Match:', match);

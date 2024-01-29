@@ -18,7 +18,10 @@ import {
     updateMatchupScore, addMatchup,
     getUserByEmail,
     resetPassword,
-    updateVerificationToken, checkIfLadderExists
+    updateVerificationToken, 
+    checkIfLadderExists,
+    getListOfTournamentsUserCreated,
+    getFullListOfTournamentsUserIsSignedUpTo,
 } from "./utils/db_ops.js";
 
 const app = express()
@@ -677,6 +680,95 @@ app.get("/fetch_results_for_tournament", async (req, res) => {
 
 });
 
+app.get("/get_list_of_tournaments_user_created", async (req, res) => {
+    const { token, email } = req.query;
+    console.log("email: " + email);
+    console.log("token: " + token);
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": [] });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            console.log("decoded: " + decoded);
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": [] });
+            } else {
+                if (decoded.email === email) {
+                    // Token is valid
+
+                    try {
+                        // Call getListOfTournamentsUserCreated function to get the list of tournaments
+                        const tournaments = await getListOfTournamentsUserCreated(email);
+
+                        // Send the structured response
+                        res.send({ "status": "success", "message": "Success", "data": tournaments });
+                    } catch (error) {
+                        console.error('Error fetching tournaments:', error);
+                        res.send({ "status": "error", "message": "Database error", "data": [] });
+                    }
+                } else {
+                    // Token is invalid
+                    res.send({ "status": "error", "message": "Invalid token", "data": [] });
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
+app.get("/get_full_list_of_tournaments_user_is_signed_up_to", async (req, res) => {
+    const { token, email } = req.query;
+    console.log("email: " + email);
+    console.log("token: " + token);
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token", "data": [] });
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            console.log("decoded: " + decoded);
+            if (err) {
+                console.log(err);
+                res.send({ "status": "error", "message": "Invalid token", "data": [] });
+            } else {
+                if (decoded.email === email) {
+                    // Token is valid
+
+                    try {
+                        // Call getListOfTournamentsUserCreated function to get the list of tournaments
+                        const tournaments = await getFullListOfTournamentsUserIsSignedUpTo(email);
+
+                        // Send the structured response
+                        res.send({ "status": "success", "message": "Success", "data": tournaments });
+                    } catch (error) {
+                        console.error('Error fetching tournaments:', error);
+                        res.send({ "status": "error", "message": "Database error", "data": [] });
+                    }
+                } else {
+                    // Token is invalid
+                    res.send({ "status": "error", "message": "Invalid token", "data": [] });
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+
+});
 
 app.post("/update_matchup_score", async (req, res) => {
     const { token, tournament_id, participant1, participant2, score1, score2, verified} = req.body;
