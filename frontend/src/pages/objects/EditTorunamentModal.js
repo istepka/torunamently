@@ -13,10 +13,10 @@ const EditTournamentModal = ({ onClose, tournamentId }) => {
   
   const [tournamentData, setTournamentData] = useState({
     name: '',
-    date: new Date(),
+    time: new Date(),
     location: '',
     discipline: '',
-    coordinates: '',
+    geo_coordinates: '',
     max_participants: 0,
     app_deadline: new Date(),
     creator: localStorage.getItem('email'),
@@ -49,7 +49,15 @@ const EditTournamentModal = ({ onClose, tournamentId }) => {
           setShowPopup(true);
           return;
         }
+
+        jsonData.data.tournament.time = new Date(jsonData.data.tournament.time);
+        jsonData.data.tournament.app_deadline = new Date(jsonData.data.tournament.app_deadline);
+     
+
         setTournamentData(jsonData.data.tournament);
+
+
+        console.log(jsonData.data.tournament);
       } catch (err) {
         console.log(err);
       }
@@ -103,7 +111,10 @@ const EditTournamentModal = ({ onClose, tournamentId }) => {
           // wait 2 seconds before closing the modal
           setTimeout(() => {
             onClose();
+            window.location.reload();
           }, 2000);
+
+
         } else {
           // Tournament update failed
           setPopupMessage(res.data.message);
@@ -124,14 +135,34 @@ const EditTournamentModal = ({ onClose, tournamentId }) => {
     setShowSponsorSection(true);
   };
 
+  function isValidCoordinates(coordinates) {
+    if (!coordinates) {
+        return false;
+    }
+    
+    // if empty string, return true
+    if (coordinates.trim() === "") {
+        return true;
+    }
+
+    // Regular expression to match latitude and longitude format: [latitude, longitude]
+    const coordinatesRegex = /^\s*-?([0-8]?[0-9]|90)\.[0-9]{1,6}\s*,\s*-?((1?[0-7]?|[0-9]?)[0-9]|180)\.[0-9]{1,6}\s*$/;
+    return coordinatesRegex.test(coordinates.trim());
+  }
+
+  const isValidInput = (value) => {
+      return value.length >= 3 || value.trim() === "";
+  };
+
+
   const closeClick = () => {
     // Reset all fields
     setTournamentData({
       name: '',
-      date: new Date(),
+      time: new Date(),
       location: '',
       discipline: '',
-      coordinates: '',
+      geo_coordinates: '',
       max_participants: 0,
       app_deadline: new Date(),
       creator: localStorage.getItem('email'),
@@ -180,33 +211,73 @@ const EditTournamentModal = ({ onClose, tournamentId }) => {
 
                             <label htmlFor="tournamentDate">Tournament Date</label>
                             <DateTimePicker
-                                onChange={(value) => handleDateChange("date", value)}
-                                value={tournamentData.date}
+                                selected={tournamentData.time}
+                                onChange={(value) => handleDateChange("time", value)}
+                                value={tournamentData.time}
                                 className="mt-2 mb-2 full-width"
                             />
-
-                            <label htmlFor="tournamentLocation">Tournament Location</label>
-                            <input type="text" className="form-control" id="tournamentLocation" name="location" value={tournamentData.location} onChange={handleInputChange} />
+<label htmlFor="tournamentLocation">Tournament Location</label>
+                            <input 
+                                type="text"
+                                className={`form-control ${isValidInput(tournamentData.location) ? '' : 'is-invalid'}`}
+                                id="tournamentLocation"
+                                name="location"
+                                value={tournamentData.location}
+                                onChange={handleInputChange}
+                            />
+                            {!isValidInput(tournamentData.location) && (
+                                <div className="invalid-feedback">
+                                    Please enter a location at least 3 characters long
+                                </div>
+                            )}
 
                             <label htmlFor="tournamentDiscipline">Tournament Discipline</label>
-                            <input type="text" className="form-control" id="tournamentDiscipline" name="discipline" value={tournamentData.discipline} onChange={handleInputChange} />
+                            <input 
+                                type="text" 
+                                className="form-control ${isValidInput(tournamentData.discipline) ? '' : 'is-invalid'}"
+                                id="tournamentDiscipline" 
+                                name="discipline" 
+                                value={tournamentData.discipline} onChange={handleInputChange} 
+                                />
+                            {!isValidInput(tournamentData.discipline) && (
+                                <div className="invalid-feedback">
+                                    Please enter a valid discipline name (at least 3 characters long)
+                                </div>
+                            )}
 
                             <label htmlFor="tournamentCoordinates">Tournament Geo Coordinates</label>
-                            <input type="text" className="form-control" id="tournamentCoordinates" name="coordinates" value={tournamentData.coordinates} onChange={handleInputChange} />
+                            <input 
+                                type="text"
+                                className={`form-control ${isValidCoordinates(tournamentData.geo_coordinates) ? '' : 'is-invalid'}`}
+                                id="tournamentCoordinates"
+                                name="coordinates"
+                                value={tournamentData.geo_coordinates}
+                                onChange={handleInputChange}
+                            />
+                            {!isValidCoordinates(tournamentData.geo_coordinates) && (
+                                <div className="invalid-feedback">
+                                    Please enter valid geo coordinates (latitude, longitude), e.g., 40.7128, -74.0060
+                                </div>
+                            )}
 
                             <label htmlFor="tournamentMaxParticipants">Tournament Max Participants</label>
-                            <input type="number" className="form-control" 
-                                id="tournamentMaxParticipants" name="max_participants" 
-                                value={tournamentData.max_participants} onChange={handleInputChange} min="0" max="1000" 
-                                onKeyPress={(event) => {
-                                    if (!/[0-9]/.test(event.key)) {
-                                        event.preventDefault();
-                                    }
-                                }}
-                            />
+                            <select
+                                id="tournamentMaxParticipants"
+                                name="max_participants"
+                                value={tournamentData.max_participants}
+                                onChange={handleInputChange}
+                                className="form-control"
+                            >
+                                <option value="4">4</option>
+                                <option value="8">8</option>
+                                <option value="16">16</option>
+                                <option value="32">32</option>
+                                <option value="64">64</option>
+                            </select>
 
                             <label htmlFor="tournamentAppDeadline">Tournament Application Deadline</label>
                             <DateTimePicker
+                                selected={tournamentData.app_deadline}
                                 onChange={(value) => handleDateChange("app_deadline", value)}
                                 value={tournamentData.app_deadline}
                                 className="mt-2 mb-2 full-width"

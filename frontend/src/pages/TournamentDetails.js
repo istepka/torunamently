@@ -39,6 +39,7 @@ const TournamentDetails = () => {
     const [popupMessage, setPopupMessage] = useState('');
     const [popupTitle, setPopupTitle] = useState(''); // ["Error", "Success"]
     const [showPopup, setShowPopup] = useState(false);
+    const [tournamentFull, setTournamentFull] = useState(false);
 
     useEffect(() => {
         const fetchTournamentDetails = async () => {
@@ -52,12 +53,22 @@ const TournamentDetails = () => {
                     return;
                 }
                 setTournament(jsonData.data.tournament);
+
+
+                // Check if tournament is full after updating tournament details
+                if (jsonData.data.tournament.max_participants === participants?.length) {
+                    setTournamentFull(true);
+                } else {
+                    setTournamentFull(false);
+                }
+
+                console.log('fetchTournamentDetails: ', jsonData.data.tournament.max_participants, participants?.length, tournamentFull);
+
             }
             catch (err) {
                 console.log(err);
             }
         }
-        fetchTournamentDetails();
 
         const fetchSponsors = async () => {
             try {
@@ -76,8 +87,7 @@ const TournamentDetails = () => {
                 console.log(err);
             }
         }
-        fetchSponsors();
-
+      
         const fetchParticipants = async () => {
             try {
                 const token = localStorage.getItem("token");
@@ -90,13 +100,18 @@ const TournamentDetails = () => {
                     return;
                 }
                 setParticipants(jsonData.data);
+
+                // Check if tournament is full after updating participants
+                if (tournament && tournament?.max_participants === jsonData.data.length) {
+                    setTournamentFull(true);
+                } else {
+                    setTournamentFull(false);
+                }
             }
             catch (err) {
                 console.log(err);
             }
         }
-
-        fetchParticipants();
 
         const checkIfSignedUpToTournament = async () => {
             try {
@@ -158,11 +173,15 @@ const TournamentDetails = () => {
                 return false;
             }
         }
-        
       
         const fetchData = async () => {
             try {
-                const [signedUpResult, creatorResult, isAuthenticatedResult] = await Promise.all([
+
+                await fetchParticipants();
+                await fetchTournamentDetails();
+
+                const [sp, signedUpResult, creatorResult, isAuthenticatedResult] = await Promise.all([
+                    fetchSponsors(),
                     checkIfSignedUpToTournament(),
                     checkIfUserIsTournamentCreator(),
                     checkIfUserIsAuthenticated(),
@@ -172,19 +191,24 @@ const TournamentDetails = () => {
                 setIsSignedUp(signedUpResult);
                 setIsCreator(creatorResult);
                 setIsAuthenticated(isAuthenticatedResult);
+
+                console.log('TouranmentFull--------: ', tournamentFull, tournament?.max_participants, participants?.length);
+
             } catch (err) {
                 console.log(err);
             }
         };
     
         fetchData();
-    }, [id, setTournament, setSponsors, setIsSignedUp, setShowEditModal]);
+    }, [id, participants?.length, tournament?.max_participants, tournamentFull]);
     
     function showPopupMessage(title, message) {
         setPopupTitle(title);
         setPopupMessage(message);
         setShowPopup(true);
     }
+
+
 
     const handleSignUp = ({ licenseNumber, currentRanking }) => {
         const token = localStorage.getItem("token");
@@ -208,8 +232,14 @@ const TournamentDetails = () => {
                     // show popup
                     showPopupMessage("Success", res.data.message);
 
-                    // refresh page
-                    window.location.reload();
+                    // destroy popup in 2 seconds
+                    setTimeout(() => {
+                        setShowPopup(false);
+                        // refresh page
+                        window.location.reload();
+                    }, 2000);
+
+
 
                 } else {
                     // show popup
@@ -370,16 +400,25 @@ const TournamentDetails = () => {
 
     function renderLadderButton() {
         return (
-            <button type="button" className="btn btn-primary ml-2" data-toggle="modal" data-target="#ladderModal">
-            Ladder
-          </button>
-          
+        <div className="d-flex justify-content-center">
+            <button 
+                type="button" 
+                className="btn btn-primary ml-2" 
+                data-toggle="modal" 
+                data-target="#ladderModal"
+                disabled={!tournamentFull}
+                >
+                Ladder
+            </button>
+            { tournamentFull ? null : <p className="text-danger ml-2">Ladder will be available after the tournament is full.</p> }
+        </div>
         );
     }
     
 
     if ((!isAuthenticated || isSignedUp) && tournament) {
         console.log('User is not authenticated and not signed up: ', isAuthenticated, isSignedUp);
+        console.log('IsTouranmentFull: ', tournamentFull);
         return (
             <div>
                 <Header />
@@ -402,13 +441,14 @@ const TournamentDetails = () => {
     }
     else {
         console.log('User is ok');
+        console.log('IsTouranmentFull: ', tournamentFull);
         return (
             <div>
                 <Header />
                 <div className="container container-t mt-3 mb-3 ">
                         {renderTournamentDetails()}
                         <div className="d-flex justify-content-center mt-5 mb-5 tournament-details-buttons">
-                            {renderSignUpButton(true)}
+                            {renderSignUpButton(!tournamentFull)}
                             {renderEditButton(isCreator)}
                             {renderLadderButton()}
                         </div>
@@ -418,7 +458,7 @@ const TournamentDetails = () => {
                 <TournamentSignUpModal onClose={() => setShowSignUpModal(false)} onSignUp={handleSignUp} />
                 <SystemPopup title={popupTitle} message={popupMessage} show={showPopup} onClose={() => setShowPopup(false)} />
                 <LadderModal participants={participants} onClose={() => setShowLadderModal(false)} tournament_id={id} />
-
+             
             </div>
         );
     }

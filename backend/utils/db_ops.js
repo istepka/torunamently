@@ -493,12 +493,14 @@ async function getLadder(tournamentId) {
             // Paired up participants must be next to each other in the ladder
 
             for (const participant of participants) {
-
-                if (pairedUpParticipants.includes(participant)) {
-                    continue;
-                }
                 
                 const pairedParticipantResult = currentResults.find(result => result.participant1 === participant || result.participant2 === participant);
+                console.log('Paired participant result:', pairedParticipantResult);
+                if (pairedParticipantResult 
+                    && (pairedUpParticipants.includes(pairedParticipantResult.participant1) 
+                    || pairedUpParticipants.includes(pairedParticipantResult.participant2))) {
+                    continue;
+                }
 
                 if (pairedParticipantResult) {
                     pairedUpParticipants.push(pairedParticipantResult.participant1);

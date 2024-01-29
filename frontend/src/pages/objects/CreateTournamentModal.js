@@ -36,6 +36,7 @@ const CreateTournamentModal = ({ onClose }) => {
             ...prevData,
             [name]: value,
         }));
+
     };
 
     const handleDateChange = (name, value) => {
@@ -121,6 +122,22 @@ const CreateTournamentModal = ({ onClose }) => {
         onClose();
     }
 
+    function isValidCoordinates(coordinates) {
+        // if empty string, return true
+        if (coordinates.trim() === "") {
+            return true;
+        }
+
+        // Regular expression to match latitude and longitude format: [latitude, longitude]
+        const coordinatesRegex = /^\s*-?([0-8]?[0-9]|90)\.[0-9]{1,6}\s*,\s*-?((1?[0-7]?|[0-9]?)[0-9]|180)\.[0-9]{1,6}\s*$/;
+        return coordinatesRegex.test(coordinates.trim());
+    }
+
+    const isValidInput = (value) => {
+        return value.length >= 3 || value.trim() === "";
+    };
+    
+
 
 
     return (
@@ -137,7 +154,19 @@ const CreateTournamentModal = ({ onClose }) => {
 
                         <div className="form-group">
                             <label htmlFor="tournamentName">Tournament Name</label>
-                            <input type="text" className="form-control mt-2" id="tournamentName" name="name" value={tournamentData.name} onChange={handleInputChange} />
+                            <input 
+                                type="text"
+                                className={`form-control ${isValidInput(tournamentData.name) ? '' : 'is-invalid'}`}
+                                id="tournamentName"
+                                name="name"
+                                value={tournamentData.name}
+                                onChange={handleInputChange}
+                            />
+                            {!isValidInput(tournamentData.name) && (
+                                <div className="invalid-feedback">
+                                    Please enter a name at least 3 characters long
+                                </div>
+                            )}
 
                             <label htmlFor="tournamentDate">Tournament Date</label>
                             <DateTimePicker
@@ -147,24 +176,64 @@ const CreateTournamentModal = ({ onClose }) => {
                             />
 
                             <label htmlFor="tournamentLocation">Tournament Location</label>
-                            <input type="text" className="form-control" id="tournamentLocation" name="location" value={tournamentData.location} onChange={handleInputChange} />
+                            <input 
+                                type="text"
+                                className={`form-control ${isValidInput(tournamentData.location) ? '' : 'is-invalid'}`}
+                                id="tournamentLocation"
+                                name="location"
+                                value={tournamentData.location}
+                                onChange={handleInputChange}
+                            />
+                            {!isValidInput(tournamentData.location) && (
+                                <div className="invalid-feedback">
+                                    Please enter a location at least 3 characters long
+                                </div>
+                            )}
 
                             <label htmlFor="tournamentDiscipline">Tournament Discipline</label>
-                            <input type="text" className="form-control" id="tournamentDiscipline" name="discipline" value={tournamentData.discipline} onChange={handleInputChange} />
+                            <input 
+                                type="text" 
+                                className="form-control ${isValidInput(tournamentData.discipline) ? '' : 'is-invalid'}"
+                                id="tournamentDiscipline" 
+                                name="discipline" 
+                                value={tournamentData.discipline} onChange={handleInputChange} 
+                                />
+                            {!isValidInput(tournamentData.discipline) && (
+                                <div className="invalid-feedback">
+                                    Please enter a valid discipline name (at least 3 characters long)
+                                </div>
+                            )}
 
                             <label htmlFor="tournamentCoordinates">Tournament Geo Coordinates</label>
-                            <input type="text" className="form-control" id="tournamentCoordinates" name="coordinates" value={tournamentData.coordinates} onChange={handleInputChange} />
+                            <input 
+                                type="text"
+                                className={`form-control ${isValidCoordinates(tournamentData.coordinates) ? '' : 'is-invalid'}`}
+                                id="tournamentCoordinates"
+                                name="coordinates"
+                                value={tournamentData.coordinates}
+                                onChange={handleInputChange}
+                            />
+                            {!isValidCoordinates(tournamentData.coordinates) && (
+                                <div className="invalid-feedback">
+                                    Please enter valid geo coordinates (latitude, longitude), e.g., 40.7128, -74.0060
+                                </div>
+                            )}
 
                             <label htmlFor="tournamentMaxParticipants">Tournament Max Participants</label>
-                            <input type="number" className="form-control" 
-                                id="tournamentMaxParticipants" name="max_participants" 
-                                value={tournamentData.max_participants} onChange={handleInputChange} min="0" max="1000" 
-                                onKeyPress={(event) => {
-                                    if (!/[0-9]/.test(event.key)) {
-                                        event.preventDefault();
-                                    }
-                                }}
-                            />
+                            <select
+                                id="tournamentMaxParticipants"
+                                name="max_participants"
+                                value={tournamentData.max_participants}
+                                onChange={handleInputChange}
+                                className="form-control"
+                            >
+                                <option value="4">4</option>
+                                <option value="8">8</option>
+                                <option value="16">16</option>
+                                <option value="32">32</option>
+                                <option value="64">64</option>
+                            </select>
+
 
                             <label htmlFor="tournamentAppDeadline">Tournament Application Deadline</label>
                             <DateTimePicker

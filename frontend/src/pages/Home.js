@@ -149,17 +149,17 @@ const Home = () => {
 
                 <div className="center-table">
                     <table id="tournamentsTable" className="table table-sm table-striped table-hover table-bordered">
-                        <thead className="thead-dark center-titles">
-                            <tr>
+                        <thead className="thead-dark center-titles sticky-top">
+                            <tr className="tournaments-title-head">
                                 <th scope="col">#</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Date</th>
-                                <th scope="col">Location</th>
-                                <th scope="col">Discipline</th>
-                                <th scope="col">Geo Coordinates</th>
-                                <th scope="col">Max Participants</th>
-                                <th scope="col">Application Deadline</th>
-                                <th scope="col">Creator</th>
+                                <th scope="col" className='col-2'>Name</th>
+                                <th scope="col" className='col-1'>Date</th>
+                                <th scope="col" className='col-1'>Location</th>
+                                <th scope="col" className='col-1'>Discipline</th>
+                                <th scope="col" className='col-1'>Geo Coordinates</th>
+                                <th scope="col" className='col-1'>Max Participants</th>
+                                <th scope="col" className='col-1'>Application Deadline</th>
+                                <th scope="col" className='col-1'>Creator</th>
                                 {isAuthenticated ? (
                                     <th scope="col">User signed up</th>
                                 ) : (<th scope="col" style={{display: "none"}}>User signed up</th>)}
@@ -216,6 +216,7 @@ const Home = () => {
 
 
                 </div>
+
             </div>
             <CreateTournamentModal onClose={handleCreateModalToggle} />
         </div>

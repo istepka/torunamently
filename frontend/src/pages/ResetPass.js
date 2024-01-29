@@ -3,6 +3,7 @@ import axios from 'axios';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import Popup from "./objects/Popup";
+import Header from './Header';
 
 // Write code for ResetPass heere
 // User gets to this page by clicking on the link in the email they receive after clicking "Forgot Password" on the login page
@@ -72,14 +73,14 @@ const ResetPass = () => {
             const message = response.data.message;
     
             if (status === "success") {
-                setPopupMessage(message + " Redirecting to login page...");
+                setPopupMessage(message + " Redirecting to login page in 10 sec...");
                 setPopupTitle("Success");
                 setShowPopup(true);
     
                 // wait 2 seconds before redirecting to login page
                 setTimeout(() => {
                     window.location.href = "/login";
-                }, 2000);
+                }, 10000);
     
             } else {
                 setPopupMessage(message);
@@ -97,24 +98,27 @@ const ResetPass = () => {
     
 
     return (
-        <div className="container">
-            <div style={{ gridArea: "main", textAlign: "center" }}>
-                <h1 className="text-center mb-4">Reset Password</h1>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group text-left mb-4" style={{ width: "40%", margin: "auto" }}>
-                        <label htmlFor="password">Password:</label>
-                        <input type="password" className="form-control" placeholder="Enter password" name="password" value={credentials.password} onChange={handleChange} required />
-                        { passwordsMatch ? null : <p className="text-danger">Passwords do not match.</p> }
-                        { passwordsLenghtGood ? null : <p className="text-danger">Password must be at least 8 characters long.</p> }
-                    </div>
-                    <div className="form-group text-left" style={{ width: "40%", margin: "auto" }}>
-                        <label htmlFor="confirm_password">Confirm Password
-                        </label>
-                        <input type="password" className="form-control" placeholder="Confirm password" name="confirm_password" value={credentials.confirm_password} onChange={handleChange} required />
-                    </div>
-                    <button type="submit" className="btn btn-primary mt-4" style={{textAlign: "left"}}>Submit</button>
-                </form>
-                <Popup title={popupTitle} message={popupMessage} show={showPopup} onClose={() => {setShowPopup(false)}} />
+        <div>
+            <Header />
+            <div className="container mt-4">
+                <div style={{ gridArea: "main", textAlign: "center" }}>
+                    <h1 className="text-center mb-4">Reset Password</h1>
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group text-left mb-4" style={{ width: "40%", margin: "auto" }}>
+                            <label htmlFor="password">Password:</label>
+                            <input type="password" className="form-control" placeholder="Enter password" name="password" value={credentials.password} onChange={handleChange} required />
+                            { passwordsMatch ? null : <p className="text-danger">Passwords do not match.</p> }
+                            { passwordsLenghtGood ? null : <p className="text-danger">Password must be at least 8 characters long.</p> }
+                        </div>
+                        <div className="form-group text-left" style={{ width: "40%", margin: "auto" }}>
+                            <label htmlFor="confirm_password">Confirm Password
+                            </label>
+                            <input type="password" className="form-control" placeholder="Confirm password" name="confirm_password" value={credentials.confirm_password} onChange={handleChange} required />
+                        </div>
+                        <button type="submit" className="btn btn-primary mt-4" style={{textAlign: "left"}}>Submit</button>
+                    </form>
+                    <Popup title={popupTitle} message={popupMessage} show={showPopup} onClose={() => {setShowPopup(false)}} />
+                </div>
             </div>
         </div>
     );

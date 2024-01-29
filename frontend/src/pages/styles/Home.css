@@ -8,6 +8,11 @@
     vertical-align: middle;
 }
 
+.table td {
+    text-align: left;
+    vertical-align: middle;
+}
+
 .container {
     display: grid;
     grid-template-columns:  80% 20% ;
