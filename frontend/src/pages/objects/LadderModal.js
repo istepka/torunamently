@@ -17,6 +17,9 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
     const [popupTitle, setPopupTitle] = useState(''); 
     const [showPopup, setShowPopup] = useState(false);
 
+    const [allowFetch, setAllowFetch] = useState(false); // If true, fetch ladder and scores for tournament
+    const [ladderExists, setLadderExists] = useState(false); // If true, ladder exists for this tournament
+
     const supported_lengths = [2, 4, 8, 16, 32, 64];
 
 
@@ -63,10 +66,52 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                 console.error('Error fetching scores for tournament:', error);
             }
             setLoading(false);
-        }
-        fetchLadder();
-        fetchScoresForTournament();
-    }, [participants]);
+        };
+
+        const checkIfLadderExists = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:8801/check_if_ladder_exists', { params: { token, tournament_id } });
+
+                if (response.data.status === 'success') {
+                    console.log('Ladder exists:', response.data.data);
+                    console.log('Allow fetch:', allowFetch);
+
+                    if (response.data.data === true) {
+                        setLadderExists(true);
+                        setAllowFetch(true);
+                    }
+                } else {
+                    console.error('Error checking if ladder exists:', response.data.message);
+                    setLadderExists(false);
+                }
+            } catch (error) {
+                console.error('Error checking if ladder exists:', error);
+                setLadderExists(false);
+            }
+            setLoading(false);
+        };
+
+        const fetchLadderAndScores = async () => {
+            if (allowFetch) {
+                console.log('Fetching ladder and scores for tournament.');
+                
+                await Promise.all([fetchLadder(), fetchScoresForTournament()]);
+
+                console.log('Resulting vars:', ladderInit, loading, ladderExists, allowFetch);
+            }
+        };
+
+        fetchLadderAndScores().then(() => {
+            checkIfLadderExists();
+        });
+
+    }, [participants, tournament_id, allowFetch]);
+
+    useEffect(() => {
+        console.log('Resulting vars2:', ladderInit, loading, ladderExists, allowFetch);
+    }, [ladderInit, loading, ladderExists, allowFetch]);
 
     function showPopupMessage(title, message) {
         setPopupTitle(title);
@@ -491,6 +536,10 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
         );
     };
 
+    function allowFetchLadder() {
+        setAllowFetch(true);
+    }
+
     return (
         <div className="modal fade" id="ladderModal" tabIndex="-1" role="dialog" aria-labelledby="ladderModalLabel" aria-hidden="true">
             <div className="modal-dialog modal-ladder modal-dialog-scrollable" role="document" style={{maxWidth: "50%", overflow: "auto"}}>
@@ -502,8 +551,19 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                         </button>
                     </div>
                     <div className="modal-body">
+                        {!ladderExists && (
+                            <div>
+                                <div className='alert alert-danger' role='alert'>
+                                    No ladder exists for this tournament. <br />
+                                    Please create a ladder first.
+                                </div>
+                                <button className="btn btn-primary mb-2" onClick={allowFetchLadder}>Auto-generate ladder</button>
+                            </div>
+                        )}
+                        
                         {loading && <p>Loading...</p>}
-                        {!loading && ladderInit && (
+
+                        {!loading && ladderInit && ladderExists && allowFetch && (
                             <div>
                                 <table className="table ladder-table">
                                     <tbody>

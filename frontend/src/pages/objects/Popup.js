@@ -13,7 +13,7 @@ const Popup = ({ title, message, show, onClose }) => {
                     <div className="modal-body">
                         <p>{message}</p>
                     </div>
-                    <div className={`modal-footer ${message.includes("Redirecting") ? 'd-none' : ''}`}>
+                    <div className={`modal-footer ${message?.includes("Redirecting") ? 'd-none' : ''}`}>
                         <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={onClose}>Close</button>
                     </div>
                 </div>

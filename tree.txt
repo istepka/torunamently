@@ -1,0 +1,12 @@
+.
+├── backend
+│   ├── node_modules
+│   └── utils
+├── frontend
+│   ├── node_modules
+│   ├── public
+│   └── src
+├── images
+└── scripts
+
+9 directories

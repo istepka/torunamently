@@ -68,6 +68,7 @@ INSERT INTO tournamently.TOURNAMENT_PARTICIPANTS (tournament_id, participant) VA
 (2, 'volley_pro@example.com'),
 (2, 'archery_expert@example.com'),
 (2, 'tennis_champion@example.com'),
+(2, 'martial_artist@example.com'),
 
 (3, 'track_and_field@example.com'),
 (3, 'snooker_pro@example.com'),
@@ -108,6 +109,7 @@ INSERT INTO tournamently.TOURNAMENT_RESULTS (tournament_id, participant1, partic
 (1, 'hoopstar@example.com', 'soccer_fanatic@example.com', 1, 1, true),
 (1, 'archery_expert@example.com', 'tennis_champion@example.com', 0, 0, true),
 (1, 'fencing_maestro@example.com', 'golf_pro@example.com', 1, 0, false),
+(1, 'rugby_warrior@example.com', 'ignacy.stepka@gmail.com', 0, 1, false),
 
 (2, 'chess_master@example.com', 'surfing_pro@example.com', 1, 1, true),
 (2, 'golf_enthusiast@example.com', 'volley_pro@example.com', 1, 1, true),

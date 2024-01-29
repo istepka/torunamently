@@ -597,6 +597,21 @@ async function addMatchup(tournamentId, participant1, participant2) {
     }
 }
 
+async function checkIfLadderExists(tournamentId) {
+    try {
+        const ladder = await Ladder.findAll({
+            where: {
+                tournament_id: tournamentId,
+            },
+            attributes: ['participant', 'idx'],
+        });
+
+        return ladder.length > 0;
+    } catch (error) {
+        throw new Error(`Error checking if ladder exists: ${error.message}`);
+    }
+}
+
 
 export { 
     createUser, 
@@ -625,4 +640,5 @@ export {
     getUserByEmail,
     resetPassword,
     updateVerificationToken,
+    checkIfLadderExists,
 };

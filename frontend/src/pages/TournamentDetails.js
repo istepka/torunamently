@@ -341,7 +341,7 @@ const TournamentDetails = () => {
         console.log('position: ', position, typeof(position[0]), typeof(position[1]), typeof(position));
         return (
             <div className='tournament-details-container'>
-                <div className="tournament-details m-2">
+                <div className="tournament-details m-3">
                     <h1 className="mb-4">{tournament.name}</h1>
                     <p className="mb-2"><strong>Discipline:</strong> {tournament.discipline}</p>
                     <p className="mb-2"><strong>Time:</strong> {formatDate(tournament.time)}</p>
@@ -352,7 +352,7 @@ const TournamentDetails = () => {
                     <p className="mb-2"><strong>Creator:</strong> {tournament.creator}</p>
                 </div>
 
-                <div className='map-container m-2'>
+                <div className='map-container m-3'>
                     <h2 className="mb-3 text-center">Map</h2>
                     { isGeoCoordinatesValid ? (
                         <MapContainer center={position} zoom={position ? 1 : 15} scrollWheelZoom={true} style={{ height: '80%', width: '100%' }}>
@@ -373,7 +373,7 @@ const TournamentDetails = () => {
                     )
                     }
                 </div>
-                <div className='participants-list m-2'>
+                <div className='participants-list m-3'>
                     <h2>Participants</h2>
                     <ol className="list-unstyled mb-0">
                         {participants.map((participant, index) => (

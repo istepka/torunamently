@@ -18,7 +18,7 @@ import {
     updateMatchupScore, addMatchup,
     getUserByEmail,
     resetPassword,
-    updateVerificationToken,
+    updateVerificationToken, checkIfLadderExists
 } from "./utils/db_ops.js";
 
 const app = express()
@@ -605,6 +605,39 @@ app.get("/fetch_ladder", async (req, res) => {
     }
 });
 
+app.get("/check_if_ladder_exists", async (req, res) => {
+    const { token, tournament_id } = req.query;
+
+    // Check if token is undefined
+    if (token === undefined) {
+        res.send({ "status": "error", "message": "Invalid token"});
+        return;
+    }
+
+    try {
+        // Verify JWT token
+        jwt.verify(token, secret, async (err, decoded) => {
+            if (err) {
+                res.send({ "status": "error", "message": "Invalid token"});
+            } else {
+                // Token is valid
+
+                try {
+                    const ladderExists = await checkIfLadderExists(tournament_id);
+
+                    // Send the structured response
+                    res.send({ "status": "success", "message": "Yes", "data": ladderExists});
+                } catch (error) {
+                    console.error('Error fetching ladder:', error);
+                    res.send({ "status": "error", "message": "Database error"});
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error during token verification:', error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 // Get records for a tournament from tournament results table
 app.get("/fetch_results_for_tournament", async (req, res) => {
     const { token, tournament_id } = req.query;
