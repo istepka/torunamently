@@ -5,15 +5,22 @@ A web application that allows users to create tournaments, join tournaments, tra
 
 
 ## Tech Stack
-JavaScript, Node.js, Express, React, MySQL, Sequelize, Bootstrap, HTML, CSS  
+JavaScript
 
 **Backend:**
 
-- Node.js + Express as a web framework
-- MySQL + Sequelize as ORM  
+- Node.js 
+- MySQL
+- Express (server)
+- Sequelize (ORM)
+- Nodemailer (mail)
 
 **Frontend:**  
-- React 
+- React
+- Bootstrap
+- HTML
+- CSS
+- React-Leaflet (openstreet map)
 
 
 ## Installation
