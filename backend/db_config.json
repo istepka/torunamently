@@ -1,7 +1,7 @@
 {
     "host": "localhost",
-    "user": "admin",
-    "password": "admins_password",
+    "user": "USER",
+    "password": "PASSWORD",
     "port": 3306,
     "database": "tournamently"
 }

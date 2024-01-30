@@ -250,7 +250,7 @@ const EditTournamentModal = ({ onClose, tournamentId }) => {
                                 type="text"
                                 className={`form-control ${isValidCoordinates(tournamentData.geo_coordinates) ? '' : 'is-invalid'}`}
                                 id="tournamentCoordinates"
-                                name="coordinates"
+                                name="geo_coordinates"
                                 value={tournamentData.geo_coordinates}
                                 onChange={handleInputChange}
                             />

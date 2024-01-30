@@ -485,6 +485,7 @@ async function getLadder(tournamentId) {
             const participants = await getTournamentParticipants(tournamentId);
             const currentResults = await getResultsForTournament(tournamentId);
             console.log('Participants:', participants);
+            console.log('Current results:', currentResults);
             // Create ladder
             const pairedUpParticipants = [];
             const unpairedParticipants = [];
@@ -495,7 +496,7 @@ async function getLadder(tournamentId) {
             for (const participant of participants) {
                 
                 const pairedParticipantResult = currentResults.find(result => result.participant1 === participant || result.participant2 === participant);
-                console.log('Paired participant result:', pairedParticipantResult);
+                // console.log('Paired participant result:', pairedParticipantResult);
                 if (pairedParticipantResult 
                     && (pairedUpParticipants.includes(pairedParticipantResult.participant1) 
                     || pairedUpParticipants.includes(pairedParticipantResult.participant2))) {

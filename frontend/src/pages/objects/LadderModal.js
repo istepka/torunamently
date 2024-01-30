@@ -324,7 +324,8 @@ const LadderModal = ({ participants, onClose, tournament_id }) => {
                     
                     const matchup_score = checkMatchupScore(pair1.participant, pair2.participant);
 
-                    if (!matchup_score) {
+                    console.log('Matchup score:', matchup_score, pair1.participant, pair2.participant);
+                    if (matchup_score === null) {
                         checkOrAddMatchup(pair1.participant, pair2.participant);
                     }
                     
