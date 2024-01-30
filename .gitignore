@@ -1,4 +1,4 @@
 *.key
 */node_modules/
 
-*email_config.json
+*email_config.jsonbackend/email_config.json
