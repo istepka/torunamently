@@ -104,6 +104,7 @@ This is just a draft that was created to get a better understanding of the appli
 ![Application schema](images/app_scheme.png) 
 
 ## Database relations
+(yes it is not normalized :))
 ![Database relations](images/db_scheme.png)
 
 ## A couple of screenshots from the app
@@ -115,7 +116,6 @@ Login page
 ![Login page](images/login.png)
 
 Verification email 
-![Verification page](images/verification.png)
 
 Account page
 ![Account page](images/account.png)
@@ -129,7 +129,7 @@ Edit tournament page
 Tournament page
 ![Tournament page](images/tournament.png)
 
-Ladder page
+Ladder page - auto generated
 ![Ladder page](images/ladder.png)
 
 
